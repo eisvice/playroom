@@ -2,12 +2,13 @@
     padding: 10px 50px;
   }
 
-  .activity-row {
+  .activity-container {
     border: 1px solid black;
     min-height: 200px;
     border-radius: 10px;
     padding-top: 20px;
     padding-bottom: 20px;
+    margin-bottom: 20px;
   }
 
 .activity-row img {

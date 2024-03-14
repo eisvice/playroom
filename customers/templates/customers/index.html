@@ -12,69 +12,77 @@
         <div class="row text-center">
             <div class="col-sm-6">
                 <h4>First-time customers </h4>
-                <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-4/128/Male-user-add-icon.png" width="64" height="64" class="img-circle" alt="boy">
-                <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-5/128/Female-user-add-icon.png" width="64" height="64" class="img-circle" alt="girl">
+                <button class="btn btn-outline-light btn-icon btn-add" id="add-new-boy">
+                    <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-4/128/Male-user-add-icon.png" width="64" height="64" class="img-circle" alt="boy">
+                </button>
+                <button class="btn btn-outline-light btn-icon btn-add" id="add-new-girl">
+                    <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-5/128/Female-user-add-icon.png" width="64" height="64" class="img-circle" alt="girl">
+                </button>
             </div>
             <div class="col-sm-6">
                 <h4>Old customers</h4>
-                <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-4/64/Male-user-add-icon.png" width="64" height="64" class="img-circle" alt="boy">
-                <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-5/64/Female-user-add-icon.png" width="64" height="64" class="img-circle" alt="girl">
+                <button class="btn btn-outline-light btn-icon btn-add" id="add-old-boy">
+                    <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-4/128/Male-user-add-icon.png" width="64" height="64" class="img-circle" alt="boy">
+                </button>
+                <button class="btn btn-outline-light btn-icon btn-add" id="add-old-girl">
+                    <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-5/128/Female-user-add-icon.png" width="64" height="64" class="img-circle" alt="girl">
+                </button>
             </div>
         </div>
     </div>
 
-    <div class="container-fluid bg-grey text-center">
+    <div class="container-fluid bg-grey text-center activity-container">
         <h3>Kids in the playing room</h3>
         <div class="row activity-row">
             <div class="col-lg-2 col-md-4 col-sm-6">
                 <h4>Old customer <i class="fa fa-child"></i></h4>
                 <!-- Trigger the modal with a button -->
-                <a href="#myModal" class="btn btn-outline-warning btn-icon" data-toggle="modal">
+                <button type="button" class="btn btn-outline-warning btn-icon" data-bs-toggle="modal" data-bs-target="#myModal" data-bs-child="Old boy">
                     <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-4/64/Male-icon.png" width="64" height="64" class="img-circle" alt="boy">
-                </a>
+                </button>
             </div>
             <div class="col-lg-2 col-md-4 col-sm-6">
                 <h4>New customer <i class="fa fa-child"></i></h4>
-                <a href="#myModal" class="btn btn-outline-warning btn-icon" data-toggle="modal">
+                <button type="button" class="btn btn-outline-warning btn-icon" data-bs-toggle="modal" data-bs-target="#myModal">
                     <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-4/64/Male-icon.png" width="64" height="64" class="img-circle" alt="boy">
-                </a>
+                </button>
             </div>
             <div class="col-lg-2 col-md-4 col-sm-6">
                 <h4>New customer <i class="fa fa-child-dress"></i></h4>
-                <a href="#myModal" class="btn btn-outline-warning btn-icon" data-toggle="modal">
+                <button type="button" class="btn btn-outline-warning btn-icon" data-bs-toggle="modal" data-bs-target="#myModal">
                     <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-5/64/Woman-icon.png" width="64" height="64" class="img-circle" alt="girl">
-                </a>
+                </button>
             </div>
             <div class="col-lg-2 col-md-4 col-sm-6">
                 <h4>Old customer <i class="fa fa-child-dress"></i></h4>
-                <a href="#myModal" class="btn btn-outline-warning btn-icon" data-toggle="modal">
+                <button type="button" class="btn btn-outline-warning btn-icon" data-bs-toggle="modal" data-bs-target="#myModal">
                     <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-5/64/Woman-icon.png" width="64" height="64" class="img-circle" alt="girl">
-                </a>
+                </button>
             </div>
             <div class="col-lg-2 col-md-4 col-sm-6">
                 <h4>New customer <i class="fa fa-child"></i></h4>
-                <a href="#myModal" class="btn btn-outline-warning btn-icon" data-toggle="modal">
+                <button type="button" class="btn btn-outline-warning btn-icon" data-bs-toggle="modal" data-bs-target="#myModal">
                     <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-4/64/Male-icon.png" width="64" height="64" class="img-circle" alt="boy">
-                </a>
+                </button>
             </div>
             <div class="col-lg-2 col-md-4 col-sm-6">
                 <h4>Old customer <i class="fa fa-child-dress"></i></h4>
-                <a href="#myModal" class="btn btn-outline-warning btn-icon" data-toggle="modal">
+                <button type="button" class="btn btn-outline-warning btn-icon" data-bs-toggle="modal" data-bs-target="#myModal">
                     <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-5/64/Woman-icon.png" width="64" height="64" class="img-circle" alt="girl">
-                </a>
+                </button>
             </div>
         </div>
     </div>
 
     <!-- Modal -->
-    <div id="myModal" class="modal fade" role="dialog" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
     
         <!-- Modal content-->
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Change properies</h5>
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <form>
@@ -104,7 +112,8 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save changes</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
