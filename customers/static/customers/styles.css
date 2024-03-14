@@ -1,0 +1,27 @@
+.container-fluid {
+    padding: 10px 50px;
+  }
+
+  .activity-row {
+    border: 1px solid black;
+    min-height: 200px;
+    border-radius: 10px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+
+.activity-row img {
+    border-radius: 32px;
+    background: linear-gradient(0deg, rgba(72,195,34,1) 42%, rgba(49,253,45,0) 42%);
+}
+
+.btn-icon {
+    height: 64px;
+    padding: 0;
+    border-radius: 32px;
+}
+
+.modal-body .row {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}

@@ -1,0 +1,112 @@
+{% extends "customers/layout.html" %}
+
+
+{% block body %}
+
+    <div class="container text-center">
+        <h1>Current Activity</h1>
+        <p>Choose who just came to us</p>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row text-center">
+            <div class="col-sm-6">
+                <h4>First-time customers </h4>
+                <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-4/128/Male-user-add-icon.png" width="64" height="64" class="img-circle" alt="boy">
+                <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-5/128/Female-user-add-icon.png" width="64" height="64" class="img-circle" alt="girl">
+            </div>
+            <div class="col-sm-6">
+                <h4>Old customers</h4>
+                <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-4/64/Male-user-add-icon.png" width="64" height="64" class="img-circle" alt="boy">
+                <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-5/64/Female-user-add-icon.png" width="64" height="64" class="img-circle" alt="girl">
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid bg-grey text-center">
+        <h3>Kids in the playing room</h3>
+        <div class="row activity-row">
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <h4>Old customer <i class="fa fa-child"></i></h4>
+                <!-- Trigger the modal with a button -->
+                <a href="#myModal" class="btn btn-outline-warning btn-icon" data-toggle="modal">
+                    <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-4/64/Male-icon.png" width="64" height="64" class="img-circle" alt="boy">
+                </a>
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <h4>New customer <i class="fa fa-child"></i></h4>
+                <a href="#myModal" class="btn btn-outline-warning btn-icon" data-toggle="modal">
+                    <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-4/64/Male-icon.png" width="64" height="64" class="img-circle" alt="boy">
+                </a>
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <h4>New customer <i class="fa fa-child-dress"></i></h4>
+                <a href="#myModal" class="btn btn-outline-warning btn-icon" data-toggle="modal">
+                    <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-5/64/Woman-icon.png" width="64" height="64" class="img-circle" alt="girl">
+                </a>
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <h4>Old customer <i class="fa fa-child-dress"></i></h4>
+                <a href="#myModal" class="btn btn-outline-warning btn-icon" data-toggle="modal">
+                    <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-5/64/Woman-icon.png" width="64" height="64" class="img-circle" alt="girl">
+                </a>
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <h4>New customer <i class="fa fa-child"></i></h4>
+                <a href="#myModal" class="btn btn-outline-warning btn-icon" data-toggle="modal">
+                    <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-4/64/Male-icon.png" width="64" height="64" class="img-circle" alt="boy">
+                </a>
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <h4>Old customer <i class="fa fa-child-dress"></i></h4>
+                <a href="#myModal" class="btn btn-outline-warning btn-icon" data-toggle="modal">
+                    <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-5/64/Woman-icon.png" width="64" height="64" class="img-circle" alt="girl">
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="myModal" class="modal fade" role="dialog" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+    
+        <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Change properies</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="row text-center">
+                            <div class="col-md-12">
+                                <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-4/64/Male-icon.png" width="64" height="64" class="img-circle" alt="boy">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label for="change-name" class="col-form-label">Change name:</label>
+                            </div>
+                            <div class="col-md-8">
+                                <input type="text" class="form-control" id="change-name">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label for="customer-type" class="col-form-label">Type:</label>
+                            </div>
+                            <div class="col-md-8"><input type="text" class="form-control" id="customer-type"></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4"><label for="time-given" class="col-form-label">Time given:</label></div>
+                            <div class="col-md-8"><input type="time" step="600" value="01:00" class="form-control" id="time-given"></div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
