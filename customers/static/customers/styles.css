@@ -12,17 +12,34 @@
   }
 
 .activity-row img {
-    border-radius: 32px;
-    background: linear-gradient(0deg, rgba(72,195,34,1) 42%, rgba(49,253,45,0) 42%);
+    border-radius: 64px;
+    /* background: linear-gradient(0deg, rgba(72,195,34,1) 42%, rgba(49,253,45,0) 42%); */
 }
 
 .btn-icon {
-    height: 64px;
     padding: 0;
-    border-radius: 32px;
+    border-radius: 64px;
 }
 
 .modal-body .row {
     margin-top: 10px;
     margin-bottom: 10px;
 }
+
+
+.button-content {
+  position: relative;
+}
+
+.button-content p {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: black;
+  background-color: rgba(255, 255, 255, 0.7); /* Optional: Add a background color with transparency */
+  border-radius: 5px;
+  text-align: center;
+}
+
+
