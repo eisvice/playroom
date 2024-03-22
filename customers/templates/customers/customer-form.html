@@ -1,0 +1,77 @@
+<!-- Modal content-->
+<div class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title">Change properies</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    </div>
+    <div class="modal-body">
+        <form>
+            <div class="row text-center">
+                <div class="col-md-12">
+                    <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-4/64/Male-icon.png" width="64" height="64" class="img-circle" alt="boy">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <label for="change-name" class="col-form-label">Change name:</label>
+                </div>
+                <div class="col-md-8">
+                    <input type="text" class="form-control" id="change-name">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <label for="gender-field" class="col-form-label">Gender:</label>
+                </div>
+                <div class="col-md-8">
+                    <select type="text" class="form-control" id="gender-field">
+                        <option value="male">Male</option>
+                        <option value="female">Female</option> 
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <label for="customer-type" class="col-form-label">Type:</label>
+                </div>
+                <div class="col-md-8">
+                    <select class="form-control" id="customer-type" name="customer-type">
+                        <option value="newcommer">Newcommer</option>
+                        <option value="loyal">Loyal</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4"><label for="time-given" class="col-form-label">Duration:</label></div>
+                <div class="col-md-8">
+                    <select class="form-control" id="time-given" name="time-given">
+                        <option value="00:00:05">5 sec</option>
+                        <option value="00:00:10" selected>10 secs</option>
+                        <option value="00:00:20">20 secs</option>
+                        <option value="00:00:30">30 secs</option>
+                        <option value="00:00:40">40 secs</option>
+                        <option value="00:00:50">50 secs</option>
+                        <option value="00:01:00">60 secs</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <label for="start-time-field" class="col-form-label">Start Time</label>
+                </div>
+                <div class="col-md-8"><input type="text" class="form-control" id="start-time-field" disabled readonly></div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <label for="end-time-field" class="col-form-label">End Time</label>
+                </div>
+                <div class="col-md-8"><input type="text" class="form-control" id="end-time-field" disabled readonly></div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-primary">Finish Now</button>
+        <button type="submit" class="btn btn-primary" id="save-modal">Save Changes</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+    </div>
+</div>

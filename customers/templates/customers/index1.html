@@ -1,0 +1,84 @@
+{% extends "customers/layout.html" %}
+
+
+{% block body %}
+
+    <div class="container text-center">
+        <h1>Current Activity</h1>
+        <p>Choose who just came to us</p>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row text-center">
+            <div class="col-sm-6" id="new-customer">
+                <h4>First-time customers </h4>
+                <form hx-post="{% url 'add-new-customer' %}" hx-target="#new-customer" hx-swap="outerHTML" >
+                    <input type="submit" value="Add New Boy" class="btn btn-outline-dark btn-icon btn-add" name="add-new-boy" id="add-new-boy">
+                        <!-- <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-4/128/Male-user-add-icon.png" width="64" height="64" class="img-circle" alt="boy"> -->
+                    <input type="submit" value="Add New Girl" class="btn btn-outline-dark btn-icon btn-add" name="add-new-girl" id="add-new-girl">
+                        <!-- <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-5/128/Female-user-add-icon.png" width="64" height="64" class="img-circle" alt="girl"> -->
+                </form>
+            </div>
+            <div class="col-sm-6">
+                <h4>Returning customers</h4>
+                <button class="btn btn-outline-light btn-icon btn-add" id="add-old-boy">
+                    <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-4/128/Male-user-add-icon.png" width="64" height="64" class="img-circle" alt="boy">
+                </button>
+                <button class="btn btn-outline-light btn-icon btn-add" id="add-old-girl">
+                    <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-5/128/Female-user-add-icon.png" width="64" height="64" class="img-circle" alt="girl">
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container bg-grey text-center activity-container">
+        <h3>Kids in the playing room</h3>
+        <div class="row activity-row">
+            
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+        <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Change properies</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="row text-center">
+                            <div class="col-md-12">
+                                <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-4/64/Male-icon.png" width="64" height="64" class="img-circle" alt="boy">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label for="change-name" class="col-form-label">Change name:</label>
+                            </div>
+                            <div class="col-md-8">
+                                <input type="text" class="form-control" id="change-name">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label for="customer-type" class="col-form-label">Type:</label>
+                            </div>
+                            <div class="col-md-8"><input type="text" class="form-control" id="customer-type"></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4"><label for="time-given" class="col-form-label">Time given:</label></div>
+                            <div class="col-md-8"><input type="time" step="600" value="01:00" class="form-control" id="time-given"></div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary">Save changes</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

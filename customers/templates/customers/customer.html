@@ -1,0 +1,24 @@
+<div class="col-lg-2 col-md-4 col-sm-6 customer-info">
+    <h6 style="display: flex; justify-content: center;">
+        <div hx-post="{% url 'add-hour' c.id %}" hx-swap="innerHTML" hx-target="next #duration-{{c.id}}" style="cursor: pointer" class="add-hour-btn">
+            <i class="fa-regular fa-clock " style="color: #63E6BE;"></i>
+        </div>
+        &nbsp;{{ c.name }}&nbsp;
+        <div hx-post="{% url 'delete-customer' c.id %}" hx-swap="delete" hx-target="closest .customer-info" style="cursor: pointer" class="delete-btn">
+            <i class="fa-solid fa-xmark fa-lg" style="color: #ff3d91;"></i>
+        </div>
+        <div hx-post="{% url 'finish' c.id %}" hx-swap="delete" hx-target="closest .customer-info" style="cursor: pointer" class="finish-btn">
+            <i class="fa-solid fa-flag-checkered" style="color: #6882eb;"></i>
+        </div>
+    </h6>
+    <button class="btn btn-outline-warning btn-icon" data-bs-target="#myModal" data-bs-toggle="modal" data-bs-kid="{{c.customer_type}}">
+        <div class="button-content">
+            <p class="timer" id="duration-{{c.id}}" data-end-time="{{c.end_time|date:'c'}}">{{ c.duration }}</p>
+            {% if c.gender == "male" %}
+                <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-4/96/Male-icon.png">
+            {% elif c.gender == "female" %}
+                <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-5/96/Woman-icon.png">
+            {% endif %}
+        </div>
+    </button>
+</div>

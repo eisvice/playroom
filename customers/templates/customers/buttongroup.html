@@ -1,0 +1,25 @@
+<div class="container-fluid">
+    <div class="row text-center" id="buttons">
+        <div class="col-sm-6" id="new-customer">
+            <h4>First-time customers </h4>
+            <button class="btn btn-outline-light btn-icon" hx-post="{% url 'index' %}" hx-trigger="click" hx-swap="none" name="add-new-boy">
+                <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-4/128/Male-user-add-icon.png" width="64" height="64" class="img-circle" alt="boy">
+            </button>
+            <button class="btn btn-outline-light btn-icon" hx-post="{% url 'index' %}" hx-trigger="click" hx-swap="none" name="add-new-girl">
+                <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-5/128/Female-user-add-icon.png" width="64" height="64" class="img-circle" alt="girl">
+            </button>
+        </div>
+        <div class="col-sm-6">
+            <h4>Returning customers</h4>
+            <button class="btn btn-outline-light btn-icon" hx-post="{% url 'index' %}" hx-trigger="click" hx-swap="none" name="add-old-boy">
+                <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-4/128/Male-user-add-icon.png" width="64" height="64" class="img-circle" alt="boy">
+            </button>
+            <button class="btn btn-outline-light btn-icon" hx-post="{% url 'index' %}" hx-trigger="click" hx-swap="none" name="add-old-girl">
+                <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-5/128/Female-user-add-icon.png" width="64" height="64" class="img-circle" alt="girl">
+            </button>
+            <button class="btn btn-primary" hx-post="{% url 'delete-customers' %}" hx-trigger="click" hx-swap="outerHTML" hx-target="#customer-list" name="clear">
+                Clear
+            </button>
+        </div>
+    </div>
+</div>

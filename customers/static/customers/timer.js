@@ -1,194 +1,240 @@
-
 document.addEventListener('DOMContentLoaded', function() {
+    
     const currentUrl = window.location.href;
     console.log(currentUrl); 
 
-    document.querySelectorAll('.btn-add').forEach(button => {
-        button.addEventListener('click', function(event) {
-            event.preventDefault();
-            console.log(`hi ${button.id}`);
-            // Create a new common div element
-            var div = document.createElement("div");
-            div.classList.add("col-lg-2", "col-md-4", "col-sm-6", "customer-info");
-
-            // Create a new h4 element
-            var h4 = document.createElement("h6");
-            var h4Inside;
-
-            // Create a new i element
-            var icon = document.createElement("i");
-
-            // Create a new button
-            var link = document.createElement("button");
-            link.type = "button";
-            link.classList.add("btn", "btn-outline-warning", "btn-icon");
-            link.setAttribute('data-bs-target', '#myModal');
-            link.setAttribute("data-bs-toggle", "modal");
-
-            // Create a new img element
-            var img = document.createElement("img");
-            if (button.id === 'add-new-boy') {
-                img.src = "https://icons.iconarchive.com/icons/custom-icon-design/flatastic-4/96/Male-icon.png";
-                img.alt = "boy";
-                h4Inside = " Newcomer ";
-                icon.classList.add("fa", "fa-child");
-                link.setAttribute("data-bs-child", "New boy");
-            } else if (button.id === 'add-old-boy') {
-                img.src = "https://icons.iconarchive.com/icons/custom-icon-design/flatastic-4/96/Male-icon.png";
-                img.alt = "boy";
-                h4Inside = " Loyal ";
-                icon.classList.add("fa", "fa-child");
-                link.setAttribute("data-bs-child", "Old boy");
-            } else if (button.id === 'add-new-girl') {
-                img.src = "https://icons.iconarchive.com/icons/custom-icon-design/flatastic-5/96/Woman-icon.png";
-                img.alt = "girl";
-                h4Inside = " Newcomer ";
-                icon.classList.add("fa", "fa-child-dress");
-                link.setAttribute("data-bs-child", "New girl");
-            } else if (button.id === 'add-old-girl') {
-                img.src = "https://icons.iconarchive.com/icons/custom-icon-design/flatastic-5/96/Woman-icon.png";
-                img.alt = "girl";
-                h4Inside = " Loyal ";
-                icon.classList.add("fa", "fa-child-dress");
-                link.setAttribute("data-bs-child", "Old girl");
-            }
-
-            img.width = 96;
-            img.height = 96;
-            img.classList.add("img-circle");
-            
-            h4.innerHTML += `<a href="#" type="button" class="add-hour-btn"><i class="fa-regular fa-clock " style="color: #63E6BE;"></i></a>${h4Inside}<a href="#" type="button" class="delete-btn"><i class="fa-solid fa-xmark fa-lg" style="color: #ff3d91;"></i></a>`;
-            
-            // Create a div for link and text
-            var divInside = document.createElement('div');
-            divInside.classList.add("button-content");
-            
-            const finish = document.createElement('button');
-            finish.type = 'button';
-            finish.classList.add('btn', 'btn-primary', 'btn-sm');
-            finish.textContent = 'Finish';
-            finish.style.display = 'none';
-
-            // Create an inside text
-            var timer = document.createElement('p');
-            timer.setAttribute('class', 'timer');
-            var time = '00:00:10';
-            var [hours, minutes, seconds] = time.split(':').map(Number);
-            timer.textContent = time;
-            timer.dataset.hours = hours;
-            timer.dataset.minutes = minutes;
-            timer.dataset.seconds = seconds;
-            let nIntervId = setInterval(() => {
-                updateTimer(timer, time, img, h4, h4Inside);
-            }, 1000);
-            timer.dataset.interval = nIntervId;
-            
-            // Append link and timer inside a button
-            divInside.appendChild(timer);
-            divInside.appendChild(img);
-            link.appendChild(divInside);
-
-            // Append the h4 element and the a element to the div element
-            div.appendChild(h4);
-            div.appendChild(link);
-            div.appendChild(finish);
-
-            var row = document.querySelector('.activity-row');
-
-            row.appendChild(div);
-        });
+    document.body.addEventListener('htmx:oobAfterSwap', function(evt) {
+        const content = evt.detail.target.lastElementChild.querySelector('.button-content');
+        startTimer(content);
     });
 
-    var exampleModal = document.getElementById('myModal');
+    document.addEventListener('htmx:afterRequest', function(evt) {
+        if (evt.detail.elt.classList.contains('add-hour-btn')) {
+            const timer = evt.detail.target;
+            const customerInfo = timer.closest('.customer-info');
+            let endTimeStr = timer.dataset.endTime;
+            let endTime = new Date(endTimeStr);
+            let endTimeInit = new Date(endTimeStr);
+            let currentTime = new Date();
+            endTime.setSeconds(endTime.getSeconds() + 10);
+            timer.dataset.endTime = endTime;
+            const content = timer.closest('.button-content');
+            let id = parseInt(timer.id.replace("duration-", ""));
+            if (endTimeInit < currentTime && endTime > currentTime) {
+                customerInfo.querySelector('.finish-btn').style.display = 'none';
+                customerInfo.querySelector('.delete-btn').style.display = 'block';    
+                fetch(`/customers/${id}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        status: "active",
+                    })
+                })
+                .then(response => response.json())
+                .then(result => {
+                  // Print result
+                  console.log(result);
+                });
+                startTimer(content);
+            }
+        }
+    });
+    
+
+    const contents = document.querySelectorAll('.button-content');
+    // Start the timer for each timer element
+    contents.forEach(content => {
+        const customerInfo = content.closest('.customer-info');
+        const timer = content.querySelector('.timer');
+        const img = content.querySelector('img');
+        let endTimeStr = timer.dataset.endTime;
+        let endTime = new Date(endTimeStr);
+        let currentTime = new Date();
+        if (endTime > currentTime) {
+            startTimer(content);
+        } else {
+            img.style.background = '';
+            img.style.backgroundColor = 'lightcoral';
+            timer.textContent = '00:00:00';
+            customerInfo.querySelector('.finish-btn').style.display = 'block';
+            customerInfo.querySelector('.delete-btn').style.display = 'none';
+        }
+    });
+
+    const exampleModal = document.getElementById('myModal');
+    const duration = exampleModal.querySelector('#time-given');
+    const saveChange = exampleModal.querySelector('#save-modal');
+
     exampleModal.addEventListener('show.bs.modal', function (event) {
         // Button that triggered the modal
-        var button = event.relatedTarget;
-        // Extract info from data-bs-* attributes
-        var child = button.getAttribute('data-bs-child');
-        console.log(child);
-        var image = button.querySelector('img');
-        // If necessary, you could initiate an AJAX request here
-        // and then do the updating in a callback.
-        //
-        // Update the modal's content.
-        var childName = exampleModal.querySelector('#change-name');
-        var childAvatar = exampleModal.querySelector('img');
+        const button = event.relatedTarget;
+        console.log(button);
+        const timer = button.querySelector('.timer');
+        let id = parseInt(timer.id.replace('duration-', ''));
+        const image = button.querySelector('img');
+        const name = exampleModal.querySelector('#change-name');
+        const gender = exampleModal.querySelector('#gender-field');
+        const type = exampleModal.querySelector('#customer-type');
+        const startTime = exampleModal.querySelector('#start-time-field');
+        const endTime = exampleModal.querySelector('#end-time-field');
+        // // If necessary, you could initiate an AJAX request here
+        // // and then do the updating in a callback.
+        // //
+        // // Update the modal's content.
+        fetch(`/customers/${id}`)
+        .then(response => response.json())
+        .then(customer => {
+            console.log(customer);
+            console.log(customer.id);
+            name.value = customer.name;
+            gender.value = customer.gender.toLowerCase();
+            type.value = customer.customer_type.toLowerCase();
+            duration.value = customer.duration;
+            startTime.value = new Date(customer.start_time).toLocaleString();
+            endTime.value = new Date(customer.end_time).toLocaleString();
+        })
+
+        saveChange.addEventListener('click', function() {
+            fetch(`/customers/${id}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    name: name.value,
+                    gender: gender.value,
+                    customer_type: type.value,
+                    duration: duration.value
+                })
+            })
+
+            window.location.reload();
+        });
+
+        // });
+        // var kidName = exampleModal.querySelector('#change-name');
+        var kidAvatar = exampleModal.querySelector('img');
         
-        childName.value = child;
-        childAvatar.src = image.src;
+        // kidName.value = kid;
+        kidAvatar.src = image.src;
+
 
     });
 
-    document.addEventListener('click', function(event) {
-        const target = event.target;
-        if (target.parentElement.classList.contains('delete-btn')) {
-            event.preventDefault();
-            target.closest('.customer-info').remove();
-        } else if (target.parentElement.classList.contains('add-hour-btn')) {
-            event.preventDefault();
-            console.log(target.closest('.customer-info'));
-            const info = target.closest('.customer-info');
-            console.log(info.querySelector('.btn p'));
-            const timer = info.querySelector('.btn p');
-            const timeValue = timer.textContent;
-            const [hours, minutes, seconds] = timeValue.split(':').map(Number);
-            const addHour = hours + 1;
-            const newTimeValue = `${addHour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            timer.textContent = newTimeValue;
-            timer.dataset.hours = addHour;
-            timer.dataset.minutes = minutes;
-            timer.dataset.seconds = seconds;
-        }
+    duration.addEventListener('change', (event) => {
+        const endTime = exampleModal.querySelector('#end-time-field');
+        const startTime = exampleModal.querySelector('#start-time-field');
+        const durationInit = new Date(endTime.value) - new Date(startTime.value);
+        let [hours, minutes, seconds] = duration.value.split(':').map(Number);
+        let durationMiliseconds = seconds*1000 + minutes*60*1000 + hours*60*60*1000;
+        endTime.value = (new Date(new Date(endTime.value).getTime() + durationMiliseconds - durationInit)).toLocaleString();
     });
+
+  
+
 });
 
+function startTimer(contentElement) {
+    const img = contentElement.querySelector('img');
+    const timerElement = contentElement.querySelector('.timer');
+    let endTimeStr = timerElement.dataset.endTime;
+    let endTime = new Date(endTimeStr);
+    let endTimeInit = new Date(endTimeStr);
+    let currentTimeInit = new Date();
+    let durationInit = endTime - currentTimeInit;
+    let duration = endTime - currentTimeInit;
+    let timerID = timerElement.id;
+    let id = parseInt(timerElement.id.replace("duration-", ""));
+    const customerInfo = contentElement.closest('.customer-info');
 
-function updateTimer(timerElement, time, img, h4, h4Inside) {
-    let hours = parseInt(timerElement.dataset.hours);
-    let minutes = parseInt(timerElement.dataset.minutes);
-    let seconds = parseInt(timerElement.dataset.seconds);
+    let nIntervId;
 
-    // Decrement the timer by one second
-    if (seconds > 0) {
-        seconds--;
-    } else {
-        if (minutes > 0) {
-            minutes--;
-            seconds = 59;
-        } else {
-            if (hours > 0) {
-                hours--;
-                minutes = 59;
-                seconds = 59;
-            }
+    function updateTimer() {
+        if (!document.getElementById(timerID)) {
+            stopTimer();
         }
+
+        if (endTimeStr !== timerElement.dataset.endTime) {
+            endTimeStr = timerElement.dataset.endTime;
+            endTime = new Date(endTimeStr);
+            console.log(endTime - endTimeInit);
+            durationInit += endTime - endTimeInit;
+            duration += endTime - endTimeInit;
+            endTimeInit = endTime;
+        }
+
+        duration -= 1000;
+
+        let durationInSeconds = Math.round(duration / 1000); // Convert milliseconds to seconds
+
+        // Calculate seconds
+        let seconds = Math.floor(durationInSeconds % 60);
+    
+        // Convert remaining seconds to minutes
+        let durationInMinutes = durationInSeconds / 60;
+        let minutes = Math.floor(durationInMinutes % 60);
+    
+        // Convert remaining minutes to hours
+        let durationInHours = durationInMinutes / 60;
+        let hours = Math.floor(durationInHours);
+    
+        // Update the timer display
+        timerElement.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        
+        // let backgroundPercent = (1 - (hours*3600 + minutes*60 + seconds)/(givenHours * 3600 + givenMinutes * 60 + givenSeconds)) * 100;
+        let backgroundPercent = (1 - (duration/durationInit)) * 100;
+        console.log("Percent:", backgroundPercent);
+        
+        if (duration > 0) {
+            img.style.background = `linear-gradient(0deg, rgba(72,195,34,1) ${backgroundPercent}%, rgba(49,253,45,0) ${backgroundPercent}%)`;
+        } else {
+            img.style.background = '';
+            img.style.backgroundColor = 'lightcoral';
+            timerElement.textContent = '00:00:00';
+            customerInfo.querySelector('.finish-btn').style.display = 'block';
+            customerInfo.querySelector('.delete-btn').style.display = 'none';
+            fetch(`/customers/${id}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    status: "await",
+                })
+            })
+            .then(response => response.json())
+            .then(result => {
+              // Print result
+              console.log(result);
+            });
+            stopTimer();
+        }
+
+    }
+    if (!nIntervId) {
+        nIntervId = setInterval(updateTimer, 1000);
     }
 
-    // Format the updated time
-    hours = hours.toString().padStart(2, '0');
-    minutes = minutes.toString().padStart(2, '0');
-    seconds = seconds.toString().padStart(2, '0');
-
-    // Update the timer display
-    timerElement.textContent = `${hours}:${minutes}:${seconds}`;
-
-    // Update data attributes
-    timerElement.dataset.hours = hours;
-    timerElement.dataset.minutes = minutes;
-    timerElement.dataset.seconds = seconds;
-
-    const [givenHours, givenMinutes, givenSeconds] = time.split(':').map(Number);
-    let backgroundPercent = (1 - (hours*3600 + minutes*60 + seconds)/(givenHours * 3600 + givenMinutes * 60 + givenSeconds)) * 100;
-    if (backgroundPercent < 100) {
-        img.style.background = `linear-gradient(0deg, rgba(72,195,34,1) ${backgroundPercent}%, rgba(49,253,45,0) ${backgroundPercent}%)`;
-    } else {
-        img.style.background = '';
-        img.style.backgroundColor = 'lightcoral';
-        h4.innerHTML = `<a href="#" type="button" class="add-hour-btn"><i class="fa-regular fa-clock " style="color: #63E6BE;"></i></a>${h4Inside}<a href="#" type="button" class="delete-btn"><i class="fa-solid fa-flag-checkered"></i></a>`;
-        clearInterval(parseInt(timerElement.dataset.interval));
-
-
+    function stopTimer() {
+        clearInterval(nIntervId);
+        nIntervId = null;
     }
 
 }
 
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}

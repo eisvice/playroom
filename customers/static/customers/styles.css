@@ -13,7 +13,6 @@
 
 .activity-row img {
     border-radius: 64px;
-    /* background: linear-gradient(0deg, rgba(72,195,34,1) 42%, rgba(49,253,45,0) 42%); */
 }
 
 .btn-icon {
@@ -42,4 +41,8 @@
   text-align: center;
 }
 
+
+.finish-btn {
+  display: none;
+}
 
