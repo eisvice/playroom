@@ -3,137 +3,130 @@ document.addEventListener('DOMContentLoaded', function() {
     const currentUrl = window.location.href;
     console.log(currentUrl); 
 
-    document.body.addEventListener('htmx:oobAfterSwap', function(evt) {
-        const content = evt.detail.target.lastElementChild.querySelector('.button-content');
-        startTimer(content);
-    });
-
-    document.addEventListener('htmx:afterRequest', function(evt) {
-        if (evt.detail.elt.classList.contains('add-hour-btn')) {
-            const timer = evt.detail.target;
-            const customerInfo = timer.closest('.customer-info');
+    if (currentUrl === 'http://127.0.0.1:8000/') {
+        const exampleModal = document.getElementById('modal-customer-view');
+        const duration = exampleModal.querySelector('#time-given');
+        const saveChange = exampleModal.querySelector('#save-modal');
+        
+        document.body.addEventListener('htmx:oobAfterSwap', function(evt) {
+            const content = evt.detail.target.lastElementChild.querySelector('.button-content');
+            startTimer(content);
+        });
+    
+        document.addEventListener('htmx:afterRequest', function(evt) {
+            if (evt.detail.elt.classList.contains('add-hour-btn')) {
+                const timer = evt.detail.target;
+                const customerInfo = timer.closest('.customer-info');
+                let endTimeStr = timer.dataset.endTime;
+                let endTime = new Date(endTimeStr);
+                let endTimeInit = new Date(endTimeStr);
+                let currentTime = new Date();
+                endTime.setSeconds(endTime.getSeconds() + 10);
+                timer.dataset.endTime = endTime;
+                const content = timer.closest('.button-content');
+                let id = parseInt(timer.id.replace("duration-", ""));
+                if (endTimeInit < currentTime && endTime > currentTime) {
+                    customerInfo.querySelector('.finish-btn').style.display = 'none';
+                    customerInfo.querySelector('.delete-btn').style.display = 'block';    
+                    fetch(`/customers/${id}`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: JSON.stringify({
+                            status: "active",
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                    // Print result
+                    console.log(result);
+                    });
+                    startTimer(content);
+                }
+            }
+        });
+        
+        const contents = document.querySelectorAll('.button-content');
+        // Start the timer for each timer element
+        contents.forEach(content => {
+            const customerInfo = content.closest('.customer-info');
+            const timer = content.querySelector('.timer');
+            const img = content.querySelector('img');
             let endTimeStr = timer.dataset.endTime;
             let endTime = new Date(endTimeStr);
-            let endTimeInit = new Date(endTimeStr);
             let currentTime = new Date();
-            endTime.setSeconds(endTime.getSeconds() + 10);
-            timer.dataset.endTime = endTime;
-            const content = timer.closest('.button-content');
-            let id = parseInt(timer.id.replace("duration-", ""));
-            if (endTimeInit < currentTime && endTime > currentTime) {
-                customerInfo.querySelector('.finish-btn').style.display = 'none';
-                customerInfo.querySelector('.delete-btn').style.display = 'block';    
+            if (endTime > currentTime) {
+                startTimer(content);
+            } else {
+                img.style.background = '';
+                img.style.backgroundColor = 'lightcoral';
+                timer.textContent = '00:00:00';
+                customerInfo.querySelector('.finish-btn').style.display = 'block';
+                customerInfo.querySelector('.delete-btn').style.display = 'none';
+            }
+        });
+        
+        exampleModal.addEventListener('show.bs.modal', function (event) {
+            // Button that triggered the modal
+            const button = event.relatedTarget;
+            console.log(button);
+            const timer = button.querySelector('.timer');
+            let id = parseInt(timer.id.replace('duration-', ''));
+            const image = button.querySelector('img');
+            console.log(exampleModal);
+            const name = exampleModal.querySelector('#change-name');
+            console.log(name);
+            const gender = exampleModal.querySelector('#gender-field');
+            const type = exampleModal.querySelector('#customer-type');
+            const startTime = exampleModal.querySelector('#start-time-field');
+            const endTime = exampleModal.querySelector('#end-time-field');
+            // // If necessary, you could initiate an AJAX request here
+            // // and then do the updating in a callback.
+            // //
+            // // Update the modal's content.
+            fetch(`/customers/${id}`)
+            .then(response => response.json())
+            .then(customer => {
+                console.log(customer);
+                console.log(customer.id);
+                name.innerHTML = customer.name;
+                gender.value = customer.gender.toLowerCase();
+                type.value = customer.customer_type.toLowerCase();
+                duration.value = customer.duration;
+                startTime.value = new Date(customer.start_time).toLocaleString();
+                endTime.value = new Date(customer.end_time).toLocaleString();
+            })
+        
+            saveChange.addEventListener('click', function() {
                 fetch(`/customers/${id}`, {
                     method: 'POST',
                     headers: {
                         'X-CSRFToken': getCookie('csrftoken')
                     },
                     body: JSON.stringify({
-                        status: "active",
+                        name: name.value,
+                        gender: gender.value,
+                        customer_type: type.value,
+                        duration: duration.value
                     })
                 })
-                .then(response => response.json())
-                .then(result => {
-                  // Print result
-                  console.log(result);
-                });
-                startTimer(content);
-            }
-        }
-    });
-    
-
-    const contents = document.querySelectorAll('.button-content');
-    // Start the timer for each timer element
-    contents.forEach(content => {
-        const customerInfo = content.closest('.customer-info');
-        const timer = content.querySelector('.timer');
-        const img = content.querySelector('img');
-        let endTimeStr = timer.dataset.endTime;
-        let endTime = new Date(endTimeStr);
-        let currentTime = new Date();
-        if (endTime > currentTime) {
-            startTimer(content);
-        } else {
-            img.style.background = '';
-            img.style.backgroundColor = 'lightcoral';
-            timer.textContent = '00:00:00';
-            customerInfo.querySelector('.finish-btn').style.display = 'block';
-            customerInfo.querySelector('.delete-btn').style.display = 'none';
-        }
-    });
-
-    const exampleModal = document.getElementById('myModal');
-    const duration = exampleModal.querySelector('#time-given');
-    const saveChange = exampleModal.querySelector('#save-modal');
-
-    exampleModal.addEventListener('show.bs.modal', function (event) {
-        // Button that triggered the modal
-        const button = event.relatedTarget;
-        console.log(button);
-        const timer = button.querySelector('.timer');
-        let id = parseInt(timer.id.replace('duration-', ''));
-        const image = button.querySelector('img');
-        const name = exampleModal.querySelector('#change-name');
-        const gender = exampleModal.querySelector('#gender-field');
-        const type = exampleModal.querySelector('#customer-type');
-        const startTime = exampleModal.querySelector('#start-time-field');
-        const endTime = exampleModal.querySelector('#end-time-field');
-        // // If necessary, you could initiate an AJAX request here
-        // // and then do the updating in a callback.
-        // //
-        // // Update the modal's content.
-        fetch(`/customers/${id}`)
-        .then(response => response.json())
-        .then(customer => {
-            console.log(customer);
-            console.log(customer.id);
-            name.value = customer.name;
-            gender.value = customer.gender.toLowerCase();
-            type.value = customer.customer_type.toLowerCase();
-            duration.value = customer.duration;
-            startTime.value = new Date(customer.start_time).toLocaleString();
-            endTime.value = new Date(customer.end_time).toLocaleString();
-        })
-
-        saveChange.addEventListener('click', function() {
-            fetch(`/customers/${id}`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
-                body: JSON.stringify({
-                    name: name.value,
-                    gender: gender.value,
-                    customer_type: type.value,
-                    duration: duration.value
-                })
-            })
-
-            window.location.reload();
-        });
-
-        // });
-        // var kidName = exampleModal.querySelector('#change-name');
-        var kidAvatar = exampleModal.querySelector('img');
+                window.location.reload();
+            });
         
-        // kidName.value = kid;
-        kidAvatar.src = image.src;
-
-
-    });
-
-    duration.addEventListener('change', (event) => {
-        const endTime = exampleModal.querySelector('#end-time-field');
-        const startTime = exampleModal.querySelector('#start-time-field');
-        const durationInit = new Date(endTime.value) - new Date(startTime.value);
-        let [hours, minutes, seconds] = duration.value.split(':').map(Number);
-        let durationMiliseconds = seconds*1000 + minutes*60*1000 + hours*60*60*1000;
-        endTime.value = (new Date(new Date(endTime.value).getTime() + durationMiliseconds - durationInit)).toLocaleString();
-    });
-
-  
-
+            var kidAvatar = exampleModal.querySelector('img');
+            kidAvatar.src = image.src;
+        });
+        
+        duration.addEventListener('change', (event) => {
+            const endTime = exampleModal.querySelector('#end-time-field');
+            const startTime = exampleModal.querySelector('#start-time-field');
+            const durationInit = new Date(endTime.value) - new Date(startTime.value);
+            let [hours, minutes, seconds] = duration.value.split(':').map(Number);
+            let durationMiliseconds = seconds*1000 + minutes*60*1000 + hours*60*60*1000;
+            endTime.value = (new Date(new Date(endTime.value).getTime() + durationMiliseconds - durationInit)).toLocaleString();
+        });
+    }
 });
 
 function startTimer(contentElement) {
@@ -237,4 +230,28 @@ function getCookie(name) {
         }
     }
     return cookieValue;
+}
+
+
+function editDetail(button, id) {
+    const form = button.nextElementSibling;
+    const th = document.querySelector(`#cost-${id}`);
+    let cost = parseFloat(th.innerHTML);
+    th.style.display = 'none';
+    button.style.display = 'none';
+    form.style.display = 'inline';
+    document.getElementById(`price-field-edit-${id}`).focus();
+    cancelBtn = form.nextElementSibling;
+    cancelBtn.style.display = 'inline';
+}
+
+function cancelDetail(button, id) {
+    const th = document.querySelector(`#cost-${id}`);
+    const form = button.previousElementSibling;
+    const editBtn = form.previousElementSibling;
+    button.style.display = 'none';
+    form.style.display = 'none';
+    editBtn.style.display = 'inline';
+    th.style.display = 'inline';
+    document.getElementById(`price-field-edit-${id}`).value = parseFloat(th.innerHTML);
 }

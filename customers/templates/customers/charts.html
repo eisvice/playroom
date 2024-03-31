@@ -1,0 +1,68 @@
+{% extends "customers/layout.html" %}
+
+{% block body %}
+<div class="container" style="width: 80%; max-width:800px; padding-bottom:40px; padding-top:20px">
+    <canvas id="barChar"></canvas>
+</div>
+
+<div class="container" style="width: 40%; max-width:400px;">
+    <canvas id="pieChart"></canvas>
+</div>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const ctx = document.getElementById('barChar');
+    const genderDiv = document.getElementById('pieChart');
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{cal_list}},
+            datasets: [{
+                label: 'Total',
+                data: {{cal_sum}},
+                borderWidth: 1
+                }]
+            },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: "Income by Day in {{today|date:'F'}}"
+                }
+            }    
+        }
+    });
+
+    new Chart(genderDiv, {
+        type: 'doughnut',
+        data: {
+            labels: ['Newcomer (F)', 'Newcomer (M)', 'Returning (F)', 'Returning (M)'],
+            datasets: [{
+                label: 'Amount',
+                data: {{gender_set_count}},
+                hoverOffset: 4,
+            }]
+        },
+        options: {
+            radius: "70%",
+            plugins: {
+                title: {
+                    display: true,
+                    text: [["Gender and Type"], "Total is {{gender_set.count}}"]
+                }
+            }
+        }
+    });
+
+</script>
+
+{% endblock %}

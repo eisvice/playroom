@@ -1,24 +1,25 @@
+import calendar
 import json
+from json import JSONDecodeError
+from django.views.generic import ListView
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect
-from django.http import JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, JsonResponse
 from django.urls import reverse
-from customers.models import User, Playground, ChildMock
-from datetime import datetime, timedelta
+from customers.models import User, Playground, Customer, PlaygroundDetail
 from django.template.loader import render_to_string
-from django import forms
+from django.db.models import Min, Max, Sum, Q
+from django.views.decorators.http import require_POST, require_safe
+from datetime import datetime, timedelta, date
 
-from .models import User
 
-
-class Customer:
-    id_counter = 5
+class Customer1:
+    id_counter = 100
     
     def __init__(self, gender="male", customer_type="newcommer"):
-        Customer.id_counter += 1
-        self.id = Customer.id_counter
+        Customer1.id_counter += 1
+        self.id = Customer1.id_counter
         self.gender = gender
         self.customer_type = customer_type
         self.name = customer_type.capitalize()
@@ -53,163 +54,94 @@ class Customer:
         }
 
     def __str__(self):
-        return f"Customer: id={self.id}, gender={self.gender}, is_new_customer={self.customer_type}, hours={self.hours}, duration={self.duration}, start_time={self.start_time}, end_time={self.end_time}, status={self.status}"
-
-GENDER_CHOICES = ["Male", "Female"]
-CUSTOMER_TYPE_CHOICES = ["Newcommer", "Loyal"]
-DURATION_CHOICES = {
-    "0.5": "30 min",
-    "1": "1 hour",
-    "2": "2 hour",
-    "3": "3 hour",
-    "4": "4 hour",
-    "5": "5 hour",
-    "6": "6 hour",
-    "7": "7 hour",
-}
-
-class CustomerForm(forms.Form):
-    name = forms.CharField(label="Your name")
-    # gender = forms.ChoiceField(choices=GENDER_CHOICES)
-    # customer_type = forms.ChoiceField(choices=CUSTOMER_TYPE_CHOICES)
-    # duration = forms.ChoiceField(choices=DURATION_CHOICES)
-    start_time = forms.DateTimeField()
-    end_time = forms.DateTimeField()
-
-c1 = Customer()
-c1.id = 1
-c1.gender = "male"
-c1.customer_type = "newcommer"
-c1.name = "John"
-c1.hours = 60
-c1.duration = "00:01:00"
-c1.start_time = "2024-03-22T17:38:59.254704"
-c1.end_time = "2024-03-22T17:39:59.254704"
-c1.status = "await"
-
-c2 = Customer()
-c2.id = 2
-c2.gender = "male"
-c2.customer_type = "loyal"
-c2.name = "Bob"
-c2.hours = 10
-c2.duration = "00:00:10"
-c2.start_time = "2024-03-22T17:40:00.254704"
-c2.end_time = "2024-03-22T17:40:10.254704"
-c2.status = "await"
-
-c3 = Customer()
-c3.id = 3
-c3.gender = "female"
-c3.customer_type = "newcommer"
-c3.name = "Mag"
-c3.hours = 30
-c3.duration = "00:00:30"
-c3.start_time = "2024-03-22T17:40:10.254704"
-c3.end_time = "2024-03-22T17:40:40.254704"
-c3.status = "await"
-
-c4 = Customer()
-c4.id = 4
-c4.gender = "female"
-c4.customer_type = "loyal"
-c4.name = "Jane"
-c4.hours = 20
-c4.duration = "00:00:20"
-c4.start_time = "2024-03-22T17:40:59.254704"
-c4.end_time = "2024-03-22T17:41:19.254704"
-c4.status = "await"
-
-c5 = Customer()
-c5.id = 5
-c5.gender = "female"
-c5.customer_type = "newcommer"
-c5.name = "Alice"
-c5.hours = 60
-c5.duration = "00:01:00"
-c5.start_time = "2024-03-22T17:41:59.254704"
-c5.end_time = "2024-03-22T17:42:59.254704"
-c5.status = "await"
+        return f"Customer1: id={self.id}, gender={self.gender}, is_new_customer={self.customer_type}, hours={self.hours}, duration={self.duration}, start_time={self.start_time}, end_time={self.end_time}, status={self.status}"
 
 
 customer = ''
-customers = [c1, c2, c3, c4, c5]
+customers = []
 
-def index(request):
-    global customers, customer
-    if request.method == "POST":
-        if "add-new-boy" in request.POST:
-            customer = Customer(gender="male", customer_type="newcommer")
-        elif "add-new-girl" in request.POST:
-            customer = Customer(gender="female", customer_type="newcommer")
-        elif "add-old-boy" in request.POST:
-            customer = Customer(gender="male", customer_type="loyal")
-        elif "add-old-girl" in request.POST:
-            customer = Customer(gender="female", customer_type="loyal")
-        customers.append(customer)
 
-        context = {"count": customers}
-        print(request.POST)
-        print(customers)
-        for c in customers:
-            print(c)
-        button_group_html = render_to_string("customers/buttongroup.html")
-        customer_html = render_to_string("customers/oob-customer.html", {"c": customer})
+class HistoryDayView(ListView):
+    model = PlaygroundDetail
+    template_name = "customers/history.html"
+    context_object_name = "customs"
+    paginate_by = 5
+    ordering = "-date"
+    def get_template_names(self, *args, **kwargs):
+        if self.request.htmx:
+            return "customers/history-list.html"
+        else:
+            return self.template_name
         
-        return HttpResponse(button_group_html + customer_html)
-    for c in customers:
-        print(c)
+
+"""HOME PAGE VIEWS"""
+def index(request):
+    customers = Customer.objects.filter(Q(status='active') | Q(status='await'))
     context = {"count": customers}
     return render(request, "customers/index.html", context)
 
+@require_POST
+def add_customer(request):
+    if request.POST["add-customer"]:
+        post_string_value = request.POST["add-customer"]
+        pairs = post_string_value.split("&")
+        new_customer = {}
+        for pair in pairs:
+            key, value = pair.split("=")
+            new_customer[key] = value
+        if (new_customer["gender"] == "male" or new_customer["gender"] == "female") and (new_customer["customer_type"] == "newcomer" or new_customer["customer_type"] == "returning"):
+            if not PlaygroundDetail.objects.filter(date=date.today()):
+                PlaygroundDetail.objects.create(
+                    playground = Playground.objects.get(pk=request.user.id),
+                    user = request.user
+                )
+            playground_detail = PlaygroundDetail.objects.filter(date=date.today(), user=request.user)[0]
+            customer = Customer(
+                gender = new_customer["gender"],
+                customer_type = new_customer["customer_type"],
+                playground = playground_detail.playground,
+                playground_detail = playground_detail
+            )
+            customer.cost = float(playground_detail.rate) * customer.hours
+            customer.save()
 
+            button_group_html = render_to_string("customers/buttongroup.html")
+            customer_html = render_to_string("customers/oob-customer.html", {"c": customer})
+            return HttpResponse(button_group_html + customer_html)
+    return HttpResponseBadRequest("Some button returned invalid data")
+        
+@require_POST
 def delete_customer(request, id):
-    for c in customers:
-        if c.id == id:
-            customers.remove(c)
-            break
-    for c in customers:
-        print(c)
+    customer = Customer.objects.get(pk=id)
+    customer.delete()
     return HttpResponse(f"Deleted {id}", status=200)
 
-
+@require_POST
 def add_hour(request, id):
-    for c in customers:
-        if c.id == id:
-            c.add_hour()
-            end_time = c.duration
-            break
-        print(c)
-    return HttpResponse(f"{end_time}", status=200)
+    customer = Customer.objects.get(pk=id)
+    customer.hours += 1
+    customer.end_time = customer.start_time + timedelta(hours=float(customer.hours))
+    customer.save(update_fields=["hours", "end_time"])
+    return HttpResponse(f"{str(timedelta(hours=float(customer.hours))).zfill(8)}", status=200)
 
-
-def delete_customers(request):
-    global customers
-    if request.method == "POST":
-        if "clear" in request.POST:
-            Customer.id_counter = 0
-            customers = []
-    return render(request, "customers/customers.html")
-
-
-def find_customer(request, id):
+def update_info(request, id):
     global customers
     if request.method == "GET":
-        for c in customers:
-            if id == c.id:
-                customer = c
-                break
-        return JsonResponse(c.serialize(), status=200)
+        customer = Customer.objects.get(pk=id)
+        return JsonResponse(customer.serialize(), status=200)
     elif request.method == "POST":
-        data = json.loads(request.body)
-        print(data)
+        try:
+            data = json.loads(request.body)
+            print(data)
+        except JSONDecodeError:
+            data = ""
         if len(data) == 1 and data["status"]:
             for c in customers:
                 if id == c.id:
                     c.status = data["status"]
                     break
             return JsonResponse({"message": f"User has status '{c.status}'"}, status=201)
-        else:
+        elif len(data) > 1:
             duration_str = data["duration"]
             time_obj = datetime.strptime(duration_str, "%H:%M:%S")
             for c in customers:
@@ -221,24 +153,99 @@ def find_customer(request, id):
                     c.duration = time_obj.second
                     c.change_time(hours=time_obj.hour, minutes=time_obj.minute, seconds=time_obj.second)
                     break
-            # return JsonResponse({"message": "User information has been updated"}, status=201)
-            # return JsonResponse({"message": f"User inforamtion has been updated"}, status=201)
             context = {"count": customers}
             return render(request, "customers/index.html", context)
 
-
+@require_POST
 def finish(request, id):
-    if request.method != "POST":
-        return JsonResponse({"error": "Only POST is allowed"}, status=422)
-    for c in customers:
-        if c.id == id:
-            c.status = 'finished'
-            break
-        print(c)
-    return HttpResponse(f"User {c.id} has finished", status=200)
+    customer = Customer.objects.get(pk=id)
+    playground_detail = PlaygroundDetail.objects.filter(id=customer.playground_detail.id, user=request.user)[0]
+    customer.status = "finished"
+    customer.cost = float(customer.hours * playground_detail.rate)
+    customer.save(update_fields=["status", "cost"])
+    customers_day_total = Customer.objects.filter(playground_detail=playground_detail, status="finished").aggregate(Sum("cost"))
+    playground_detail.total_amount = float(customers_day_total["cost__sum"])
+    playground_detail.save(update_fields=["total_amount"])
+    return HttpResponse(f"User {customer.name} has finished", status=200)
 
 
-# Create your views here.
+"""HISTORY PAGE VIEWS"""
+@require_safe
+def history_detail(request, id):
+    playground_detail = PlaygroundDetail.objects.get(pk=id)
+    rows = Customer.objects.filter(playground_detail=playground_detail, status="finished").order_by("-end_time")
+    print(playground_detail.id)
+    return render(request, "customers/history-detail.html", {"rows": rows})
+
+@require_POST
+def history_update_details(request, id):
+    customer = Customer.objects.get(pk=id)
+    playground_detail = PlaygroundDetail.objects.get(id=customer.playground_detail.id)
+    try:
+        price = float(request.POST["price"])
+        if price > 0:
+            customer.cost = price
+            customer.save(update_fields=["cost"])
+            customers_day_total = Customer.objects.filter(playground_detail=playground_detail, status="finished").aggregate(Sum("cost"))
+            playground_detail.total_amount = float(customers_day_total["cost__sum"])
+            playground_detail.save(update_fields=["total_amount"])
+        else:
+            error = "Price must be greater than 0"
+    except ValueError:
+        error = "Price must be numeric"
+    if 'error' in locals():
+        return render(request, "customers/history-list.html", {"customs": [playground_detail], "error": error})
+    return render(request, "customers/history-list.html", {"customs": [playground_detail]})
+    
+
+"""CHART PAGE VIEWS"""
+@require_safe
+def charts_view(request):
+    details_min_date = PlaygroundDetail.objects.aggregate(Min("date"))
+    details_max_date = PlaygroundDetail.objects.aggregate(Max("date"))
+    details_min_date_month = details_min_date["date__min"].month
+    details_max_date_month = details_max_date["date__max"].month
+    today = datetime.today()
+
+    gender_set = Customer.objects.filter(end_time__month=today.month, end_time__year=today.year, status='finished')
+    newcomer_f = newcomer_m = returning_f = returning_m = 0
+    for g in gender_set:
+        if g.customer_type == "newcomer" and g.gender == "female":
+            newcomer_f += 1
+        elif g.customer_type == "newcomer" and g.gender == "male":
+            newcomer_m += 1
+        elif g.customer_type == "returning" and g.gender == "female":
+            returning_f += 1
+        elif g.customer_type == "returning" and g.gender == "male":
+            returning_m += 1
+    gender_set_count = [newcomer_f, newcomer_m, returning_f, returning_m]                
+    
+    query_set = PlaygroundDetail.objects.filter(date__month=today.month, date__year=today.year)
+    query_set_dates = []
+    query_set_price = []
+    for q in query_set:
+        query_set_dates.append(q.date)
+        query_set_price.append(q.total_amount)
+    cal = calendar.Calendar()
+    cal_list = []
+    cal_sum = []
+    for i in cal.itermonthdates(today.year, today.month):
+        if i.month == today.month:
+            cal_list.append(i.day)
+            try:
+                k = query_set_dates.index(i)
+                cal_sum.append(float(query_set_price[k]))
+            except ValueError:
+                cal_sum.append(0)
+    return render(request, "customers/charts.html", {
+        "cal_list": cal_list,
+        "cal_sum": cal_sum,
+        "gender_set_count": gender_set_count,
+        "gender_set": gender_set,
+        "today": today,
+    })
+
+
 def login_view(request):
     if request.method == "POST":
 

@@ -11,7 +11,7 @@
             <i class="fa-solid fa-flag-checkered" style="color: #6882eb;"></i>
         </div>
     </h6>
-    <button class="btn btn-outline-warning btn-icon" data-bs-target="#myModal" data-bs-toggle="modal" data-bs-kid="{{c.customer_type}}">
+    <button class="btn btn-outline-warning btn-icon" data-bs-target="#modal-customer-view" data-bs-toggle="modal" data-bs-kid="{{c.customer_type}}">
         <div class="button-content">
             <p class="timer" id="duration-{{c.id}}" data-end-time="{{c.end_time|date:'c'}}">{{ c.duration }}</p>
             {% if c.gender == "male" %}

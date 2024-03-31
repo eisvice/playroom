@@ -1,0 +1,26 @@
+
+{% for customer in customs %}
+    {% if forloop.last and page_obj.has_next %}
+        <div
+            class="container-fluid text-center day-info"
+            hx-trigger="revealed"
+            hx-get="{% url 'history' %}?page={{ page_obj.number|add:1 }}"
+            hx-swap="afterend"
+        >
+        
+    {% else %}
+        <div class="container-fluid text-center day-info">
+    {% endif %}
+            <h3>{{customer.date}} | Total: {{customer.total_amount}}</h3>
+            {% if error %}
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    {{ error }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endif %}
+            <div hx-get="{% url 'history-detail' customer.id %}" hx-trigger="load" hx-swap="innerHTML" class="table-holder">
+                {% include "customers/history-detail.html" %}
+            </div>
+        </div>
+{% endfor %}
+

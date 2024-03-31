@@ -46,3 +46,41 @@
   display: none;
 }
 
+
+table, td, th {
+  border: 0px solid black;
+}
+
+
+.day-info {
+  display: grid;
+}
+
+
+.table-holder {
+  display: grid;
+  width: 50%;
+  justify-self: end;
+}
+
+
+.day-detail {
+  display: grid;
+  justify-self: start;
+}
+
+.price-field-edit {
+  max-width:100px; 
+  display:unset; 
+  vertical-align:bottom;
+}
+
+.price-field-edit:focus {
+  box-shadow: 0 0 0 0.1rem rgba(13,202,240,.25);
+}
+
+td {
+  padding-bottom: 6px;
+  color: #616161;
+  font-size: smaller;
+}
