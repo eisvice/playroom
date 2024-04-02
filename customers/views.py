@@ -12,53 +12,7 @@ from django.template.loader import render_to_string
 from django.db.models import Min, Max, Sum, Q
 from django.views.decorators.http import require_POST, require_safe
 from datetime import datetime, timedelta, date
-
-
-class Customer1:
-    id_counter = 100
-    
-    def __init__(self, gender="male", customer_type="newcommer"):
-        Customer1.id_counter += 1
-        self.id = Customer1.id_counter
-        self.gender = gender
-        self.customer_type = customer_type
-        self.name = customer_type.capitalize()
-        self.hours = 10
-        self.start_time = datetime.now()
-        self.status = "active"
-        self.update_duration_and_time()
-        
-    def update_duration_and_time(self):
-        self.duration = str(timedelta(seconds=self.hours)).zfill(8)
-        self.end_time = self.start_time + timedelta(seconds=self.hours)
-        
-    def add_hour(self):
-        self.hours += 10
-        self.update_duration_and_time()
-
-    def change_time(self, hours, minutes, seconds):
-        total_duration = hours*3600 + minutes*60 + seconds
-        self.hours = total_duration
-        self.update_duration_and_time()
-        
-    def serialize(self):
-        return {
-            "id": self.id,
-            "name": self.name,
-            "gender": self.gender,
-            "customer_type": self.customer_type,
-            "duration": self.duration,
-            "start_time": self.start_time,
-            "end_time": self.end_time,
-            "status": self.status,
-        }
-
-    def __str__(self):
-        return f"Customer1: id={self.id}, gender={self.gender}, is_new_customer={self.customer_type}, hours={self.hours}, duration={self.duration}, start_time={self.start_time}, end_time={self.end_time}, status={self.status}"
-
-
-customer = ''
-customers = []
+from django.core.paginator import Paginator
 
 
 class HistoryDayView(ListView):
@@ -77,7 +31,7 @@ class HistoryDayView(ListView):
 """HOME PAGE VIEWS"""
 def index(request):
     customers = Customer.objects.filter(Q(status='active') | Q(status='await'))
-    context = {"count": customers}
+    context = {"customers": customers}
     return render(request, "customers/index.html", context)
 
 @require_POST
@@ -106,7 +60,7 @@ def add_customer(request):
             customer.save()
 
             button_group_html = render_to_string("customers/buttongroup.html")
-            customer_html = render_to_string("customers/oob-customer.html", {"c": customer})
+            customer_html = render_to_string("customers/oob-customer.html", {"customer": customer})
             return HttpResponse(button_group_html + customer_html)
     return HttpResponseBadRequest("Some button returned invalid data")
         
@@ -119,15 +73,18 @@ def delete_customer(request, id):
 @require_POST
 def add_hour(request, id):
     customer = Customer.objects.get(pk=id)
-    customer.hours += 1
-    customer.end_time = customer.start_time + timedelta(hours=float(customer.hours))
+    print(customer.hours)
+    if float(customer.hours) == 0.5:
+        customer.hours = float(customer.hours) + 1.5
+    else:
+        customer.hours += 1
+    customer.end_time = customer.start_time + timedelta(minutes=float(customer.hours))
     customer.save(update_fields=["hours", "end_time"])
-    return HttpResponse(f"{str(timedelta(hours=float(customer.hours))).zfill(8)}", status=200)
+    return HttpResponse(f"{str(timedelta(minutes=float(customer.hours))).zfill(8)}", status=200)
 
 def update_info(request, id):
-    global customers
+    customer = Customer.objects.get(pk=id)
     if request.method == "GET":
-        customer = Customer.objects.get(pk=id)
         return JsonResponse(customer.serialize(), status=200)
     elif request.method == "POST":
         try:
@@ -136,25 +93,22 @@ def update_info(request, id):
         except JSONDecodeError:
             data = ""
         if len(data) == 1 and data["status"]:
-            for c in customers:
-                if id == c.id:
-                    c.status = data["status"]
-                    break
-            return JsonResponse({"message": f"User has status '{c.status}'"}, status=201)
+            customer.status = data["status"]
+            customer.save(update_fields=["status"])
+            return JsonResponse({"message": f"User has status '{customer.status}'"}, status=201)
         elif len(data) > 1:
-            duration_str = data["duration"]
-            time_obj = datetime.strptime(duration_str, "%H:%M:%S")
-            for c in customers:
-                if id == c.id:
-                    customer = c
-                    c.name = data["name"]
-                    c.gender = data["gender"]
-                    c.customer_type = data["customer_type"]
-                    c.duration = time_obj.second
-                    c.change_time(hours=time_obj.hour, minutes=time_obj.minute, seconds=time_obj.second)
-                    break
-            context = {"count": customers}
-            return render(request, "customers/index.html", context)
+            try:
+                duration = float(data["duration"])
+            except ValueError:
+                duration = customer.hours
+            customer.name = data["name"]
+            customer.gender = data["gender"]
+            customer.customer_type = data["customer_type"]
+            customer.hours = duration
+            customer.end_time = customer.start_time + timedelta(minutes=duration)
+            customer.save(update_fields=["name", "gender", "customer_type", "hours", "end_time"])
+            context = {"customers": Customer.objects.filter(Q(status='active') | Q(status='await'))}
+        return render(request, "customers/index.html", context)
 
 @require_POST
 def finish(request, id):
@@ -201,13 +155,25 @@ def history_update_details(request, id):
 """CHART PAGE VIEWS"""
 @require_safe
 def charts_view(request):
-    details_min_date = PlaygroundDetail.objects.aggregate(Min("date"))
-    details_max_date = PlaygroundDetail.objects.aggregate(Max("date"))
-    details_min_date_month = details_min_date["date__min"].month
-    details_max_date_month = details_max_date["date__max"].month
+    details_min_date_dict = PlaygroundDetail.objects.aggregate(Min("date"))
+    details_min_date = details_min_date_dict["date__min"]
+    print(details_min_date)
     today = datetime.today()
-
-    gender_set = Customer.objects.filter(end_time__month=today.month, end_time__year=today.year, status='finished')
+    months = ((today.year - details_min_date.year)*12 + today.month - details_min_date.month)
+    print(months)
+    months_list = [month for month in range(months+1)]
+    print(months_list)
+    paginator = Paginator(months_list, 1)
+    page_number = request.GET.get("page")
+    print("page number", page_number)
+    try:
+        current_date = date(date.today().year, date.today().month-int(page_number)+1, date.today().day)
+    except TypeError:
+        current_date = today
+    page_obj = paginator.get_page(page_number)
+    print(current_date)
+    gender_set = Customer.objects.filter(end_time__month=current_date.month, end_time__year=current_date.year, status='finished')
+    print(gender_set)
     newcomer_f = newcomer_m = returning_f = returning_m = 0
     for g in gender_set:
         if g.customer_type == "newcomer" and g.gender == "female":
@@ -220,7 +186,7 @@ def charts_view(request):
             returning_m += 1
     gender_set_count = [newcomer_f, newcomer_m, returning_f, returning_m]                
     
-    query_set = PlaygroundDetail.objects.filter(date__month=today.month, date__year=today.year)
+    query_set = PlaygroundDetail.objects.filter(date__month=current_date.month, date__year=current_date.year)
     query_set_dates = []
     query_set_price = []
     for q in query_set:
@@ -229,8 +195,8 @@ def charts_view(request):
     cal = calendar.Calendar()
     cal_list = []
     cal_sum = []
-    for i in cal.itermonthdates(today.year, today.month):
-        if i.month == today.month:
+    for i in cal.itermonthdates(current_date.year, current_date.month):
+        if i.month == current_date.month:
             cal_list.append(i.day)
             try:
                 k = query_set_dates.index(i)
@@ -242,10 +208,12 @@ def charts_view(request):
         "cal_sum": cal_sum,
         "gender_set_count": gender_set_count,
         "gender_set": gender_set,
-        "today": today,
+        "current_date": current_date,
+        "page_obj": page_obj,
     })
 
 
+"""ENTERING VIEWS"""
 def login_view(request):
     if request.method == "POST":
 
@@ -264,7 +232,6 @@ def login_view(request):
             })
     else:
         return render(request, "customers/login.html")
-
 
 def logout_view(request):
     logout(request)

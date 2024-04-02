@@ -20,8 +20,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 let endTimeStr = timer.dataset.endTime;
                 let endTime = new Date(endTimeStr);
                 let endTimeInit = new Date(endTimeStr);
+                const startTimeStr = timer.dataset.startTime;
+                const startTime = new Date(startTimeStr);
+                timeDifference = Math.round((endTime - startTime)/100/60)/10;
+                console.log(timeDifference);
                 let currentTime = new Date();
-                endTime.setSeconds(endTime.getSeconds() + 10);
+                if (timeDifference === parseFloat(0.5)) {
+                    endTime.setMinutes(endTime.getMinutes() + 1);
+                    endTime.setSeconds(endTime.getSeconds() + 30)
+                } else {
+                    endTime.setMinutes(endTime.getMinutes() + 1);
+                }
                 timer.dataset.endTime = endTime;
                 const content = timer.closest('.button-content');
                 let id = parseInt(timer.id.replace("duration-", ""));
@@ -90,10 +99,11 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(customer => {
                 console.log(customer);
                 console.log(customer.id);
-                name.innerHTML = customer.name;
+                name.value = customer.name;
                 gender.value = customer.gender.toLowerCase();
                 type.value = customer.customer_type.toLowerCase();
-                duration.value = customer.duration;
+                console.log(customer.hours);
+                duration.value = customer.hours;
                 startTime.value = new Date(customer.start_time).toLocaleString();
                 endTime.value = new Date(customer.end_time).toLocaleString();
             })
@@ -119,12 +129,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         duration.addEventListener('change', (event) => {
-            const endTime = exampleModal.querySelector('#end-time-field');
-            const startTime = exampleModal.querySelector('#start-time-field');
-            const durationInit = new Date(endTime.value) - new Date(startTime.value);
-            let [hours, minutes, seconds] = duration.value.split(':').map(Number);
-            let durationMiliseconds = seconds*1000 + minutes*60*1000 + hours*60*60*1000;
-            endTime.value = (new Date(new Date(endTime.value).getTime() + durationMiliseconds - durationInit)).toLocaleString();
+            const endTimeStr = exampleModal.querySelector('#end-time-field');
+            const startTimeStr = exampleModal.querySelector('#start-time-field');
+            let startTime = new Date(startTimeStr.value).getTime();
+            durationMilliseconds = parseFloat(duration.value)*60*1000;
+            endTimeStr.value = new Date(startTime + durationMilliseconds).toLocaleString();
         });
     }
 });
@@ -134,9 +143,10 @@ function startTimer(contentElement) {
     const timerElement = contentElement.querySelector('.timer');
     let endTimeStr = timerElement.dataset.endTime;
     let endTime = new Date(endTimeStr);
+    const startTimeStr = timerElement.dataset.startTime;
+    const startTime = new Date(startTimeStr);
     let endTimeInit = new Date(endTimeStr);
     let currentTimeInit = new Date();
-    let durationInit = endTime - currentTimeInit;
     let duration = endTime - currentTimeInit;
     let timerID = timerElement.id;
     let id = parseInt(timerElement.id.replace("duration-", ""));
@@ -153,7 +163,6 @@ function startTimer(contentElement) {
             endTimeStr = timerElement.dataset.endTime;
             endTime = new Date(endTimeStr);
             console.log(endTime - endTimeInit);
-            durationInit += endTime - endTimeInit;
             duration += endTime - endTimeInit;
             endTimeInit = endTime;
         }
@@ -177,7 +186,7 @@ function startTimer(contentElement) {
         timerElement.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         
         // let backgroundPercent = (1 - (hours*3600 + minutes*60 + seconds)/(givenHours * 3600 + givenMinutes * 60 + givenSeconds)) * 100;
-        let backgroundPercent = (1 - (duration/durationInit)) * 100;
+        let backgroundPercent = (new Date() - startTime)/(endTime - startTime) * 100;
         console.log("Percent:", backgroundPercent);
         
         if (duration > 0) {

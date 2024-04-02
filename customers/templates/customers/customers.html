@@ -1,8 +1,6 @@
 <div class="row activity-row" id="customer-list"> 
     <h3>Kids in the playing room</h3>
-    {%for c in count %}
-        {% if c.status == 'active' or c.status == 'await' %}
-            {% include 'customers/customer.html' %}
-        {% endif %}
+    {%for customer in customers %}
+        {% include 'customers/customer.html' %}
     {% endfor %}
 </div>
