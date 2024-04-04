@@ -1,3 +1,8 @@
+.message-after-form {
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
 .container-fluid {
     padding: 10px 50px;
   }

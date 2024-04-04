@@ -5,7 +5,7 @@ class UserAdmin(admin.ModelAdmin):
     list_display = ("id", "username", "email", "is_staff", "is_owner")
 
 class PlaygroundAdmin(admin.ModelAdmin):
-    list_display = ("id", "user", "name")
+    list_display = ("id", "name")
 
 class CustomerAdmin(admin.ModelAdmin):
     list_display = ("id", "playground", "name", "gender", "customer_type", "hours", "status")

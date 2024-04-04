@@ -12,8 +12,10 @@ urlpatterns = [
     path("customers/delete/<int:id>", views.delete_customer, name="delete-customer"),
     path("customers/add-hour/<int:id>", views.add_hour, name="add-hour"),
     path("custoemers/finish/<int:id>", views.finish, name="finish"),
-    path("history", views.HistoryDayView.as_view(), name="history"),
+    path("history", views.history_view, name="history"),
     path("history/<int:id>", views.history_detail, name="history-detail"),
     path("history/update/<int:id>", views.history_update_details, name="history-update"),
     path("charts", views.charts_view, name="charts"),
+    path("notifications", views.notification, name="notifications"),
+    path("notifications/<int:id>", views.notification_update, name="notifications-update"),
 ] 

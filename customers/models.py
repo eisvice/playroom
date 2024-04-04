@@ -6,18 +6,18 @@ from django.utils import timezone
 
 
 # Create your models here.
-class User(AbstractUser):
-    is_owner = models.BooleanField()
-
-
 class Playground(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    name = models.CharField(max_length=100, default="UFO")
+    name = models.CharField(max_length=100)
+
+
+class User(AbstractUser):
+    is_owner = models.BooleanField(blank=True, null=True)
+    is_permission_given = models.BooleanField(blank=True, null=True)
+    playground = models.ForeignKey(Playground, on_delete=models.CASCADE)
 
 
 class PlaygroundDetail(models.Model):
     playground = models.ForeignKey(Playground, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateField(default=date.today())
     rate = models.DecimalField(max_digits=8, decimal_places=2, default=350.0)
     total_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.0)

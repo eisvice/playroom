@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const currentUrl = window.location.href;
     console.log(currentUrl); 
 
-    if (currentUrl === 'http://127.0.0.1:8000/') {
+    if (currentUrl === 'http://127.0.0.1:8000/' && !document.getElementById('wait-message')) {
         const exampleModal = document.getElementById('modal-customer-view');
         const duration = exampleModal.querySelector('#time-given');
         const saveChange = exampleModal.querySelector('#save-modal');

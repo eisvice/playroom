@@ -1,59 +1,52 @@
-import calendar
 import json
-from json import JSONDecodeError
-from django.views.generic import ListView
-from django.shortcuts import render
-from django.contrib.auth import authenticate, login, logout
-from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, JsonResponse
+import calendar
 from django.urls import reverse
-from customers.models import User, Playground, Customer, PlaygroundDetail
-from django.template.loader import render_to_string
-from django.db.models import Min, Max, Sum, Q
-from django.views.decorators.http import require_POST, require_safe
-from datetime import datetime, timedelta, date
+from json import JSONDecodeError
+from django.shortcuts import render
+from django.db import IntegrityError
 from django.core.paginator import Paginator
-
-
-class HistoryDayView(ListView):
-    model = PlaygroundDetail
-    template_name = "customers/history.html"
-    context_object_name = "customs"
-    paginate_by = 5
-    ordering = "-date"
-    def get_template_names(self, *args, **kwargs):
-        if self.request.htmx:
-            return "customers/history-list.html"
-        else:
-            return self.template_name
+from django.db.models import Min, Max, Sum, Q
+from datetime import datetime, timedelta, date
+from django.template.loader import render_to_string
+from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth import authenticate, login, logout
+from django.views.decorators.http import require_POST, require_safe
+from customers.models import User, Playground, Customer, PlaygroundDetail
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, JsonResponse, HttpResponseForbidden
         
 
 """HOME PAGE VIEWS"""
 def index(request):
-    customers = Customer.objects.filter(Q(status='active') | Q(status='await'))
-    context = {"customers": customers}
-    return render(request, "customers/index.html", context)
+    if request.user.is_authenticated and not request.user.is_permission_given:
+        return render(request, "customers/index.html", {"message": "Please wait untill you are being given a permission to see this site"})
+    elif request.user.is_authenticated:
+        customers = Customer.objects.filter(playground=request.user.playground.id).filter(Q(status='active') | Q(status='await'))
+        context = {"customers": customers}
+        return render(request, "customers/index.html", context)
+    else:
+        return HttpResponseRedirect("login")
 
 @require_POST
 def add_customer(request):
     if request.POST["add-customer"]:
         post_string_value = request.POST["add-customer"]
         pairs = post_string_value.split("&")
+        playground = Playground.objects.get(pk=request.user.playground.id)
         new_customer = {}
         for pair in pairs:
             key, value = pair.split("=")
             new_customer[key] = value
         if (new_customer["gender"] == "male" or new_customer["gender"] == "female") and (new_customer["customer_type"] == "newcomer" or new_customer["customer_type"] == "returning"):
-            if not PlaygroundDetail.objects.filter(date=date.today()):
+            if not PlaygroundDetail.objects.filter(date=date.today(), playground=playground):
                 PlaygroundDetail.objects.create(
-                    playground = Playground.objects.get(pk=request.user.id),
-                    user = request.user
+                    playground = Playground.objects.get(pk=request.user.playground.id),
                 )
-            playground_detail = PlaygroundDetail.objects.filter(date=date.today(), user=request.user)[0]
+            playground_detail = PlaygroundDetail.objects.filter(date=date.today(), playground=playground)[0]
             customer = Customer(
                 gender = new_customer["gender"],
                 customer_type = new_customer["customer_type"],
-                playground = playground_detail.playground,
+                playground = playground,
                 playground_detail = playground_detail
             )
             customer.cost = float(playground_detail.rate) * customer.hours
@@ -113,7 +106,8 @@ def update_info(request, id):
 @require_POST
 def finish(request, id):
     customer = Customer.objects.get(pk=id)
-    playground_detail = PlaygroundDetail.objects.filter(id=customer.playground_detail.id, user=request.user)[0]
+    playground = Playground.objects.get(pk=request.user.playground.id)
+    playground_detail = PlaygroundDetail.objects.filter(id=customer.playground_detail.id, playground=playground)[0]
     customer.status = "finished"
     customer.cost = float(customer.hours * playground_detail.rate)
     customer.save(update_fields=["status", "cost"])
@@ -124,6 +118,22 @@ def finish(request, id):
 
 
 """HISTORY PAGE VIEWS"""
+@require_safe
+def history_view(request):
+    if request.user.is_owner:
+        playground_detail = PlaygroundDetail.objects.filter(playground=request.user.playground).order_by("-date")
+    elif request.user.is_permission_given:
+        playground_detail = PlaygroundDetail.objects.filter(playground=request.user.playground).order_by("-date")[:3]
+    else:
+        return HttpResponseRedirect(reverse("index"))
+    paginator = Paginator(playground_detail, 5)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    if request.htmx:
+        return render(request, "customers/history-list.html", {"page_obj": page_obj})   
+    else:
+        return render(request, "customers/history.html", {"page_obj": page_obj})
+
 @require_safe
 def history_detail(request, id):
     playground_detail = PlaygroundDetail.objects.get(pk=id)
@@ -148,80 +158,118 @@ def history_update_details(request, id):
     except ValueError:
         error = "Price must be numeric"
     if 'error' in locals():
-        return render(request, "customers/history-list.html", {"customs": [playground_detail], "error": error})
-    return render(request, "customers/history-list.html", {"customs": [playground_detail]})
+        return render(request, "customers/history-list.html", {"page_obj": [playground_detail], "error": error})
+    return render(request, "customers/history-list.html", {"page_obj": [playground_detail]})
     
 
 """CHART PAGE VIEWS"""
 @require_safe
 def charts_view(request):
-    details_min_date_dict = PlaygroundDetail.objects.aggregate(Min("date"))
-    details_min_date = details_min_date_dict["date__min"]
-    print(details_min_date)
-    today = datetime.today()
-    months = ((today.year - details_min_date.year)*12 + today.month - details_min_date.month)
-    print(months)
-    months_list = [month for month in range(months+1)]
-    print(months_list)
-    paginator = Paginator(months_list, 1)
-    page_number = request.GET.get("page")
-    print("page number", page_number)
-    try:
-        current_date = date(date.today().year, date.today().month-int(page_number)+1, date.today().day)
-    except TypeError:
-        current_date = today
-    page_obj = paginator.get_page(page_number)
-    print(current_date)
-    gender_set = Customer.objects.filter(end_time__month=current_date.month, end_time__year=current_date.year, status='finished')
-    print(gender_set)
-    newcomer_f = newcomer_m = returning_f = returning_m = 0
-    for g in gender_set:
-        if g.customer_type == "newcomer" and g.gender == "female":
-            newcomer_f += 1
-        elif g.customer_type == "newcomer" and g.gender == "male":
-            newcomer_m += 1
-        elif g.customer_type == "returning" and g.gender == "female":
-            returning_f += 1
-        elif g.customer_type == "returning" and g.gender == "male":
-            returning_m += 1
-    gender_set_count = [newcomer_f, newcomer_m, returning_f, returning_m]                
-    
-    query_set = PlaygroundDetail.objects.filter(date__month=current_date.month, date__year=current_date.year)
-    query_set_dates = []
-    query_set_price = []
-    for q in query_set:
-        query_set_dates.append(q.date)
-        query_set_price.append(q.total_amount)
-    cal = calendar.Calendar()
-    cal_list = []
-    cal_sum = []
-    for i in cal.itermonthdates(current_date.year, current_date.month):
-        if i.month == current_date.month:
-            cal_list.append(i.day)
-            try:
-                k = query_set_dates.index(i)
-                cal_sum.append(float(query_set_price[k]))
-            except ValueError:
-                cal_sum.append(0)
-    return render(request, "customers/charts.html", {
-        "cal_list": cal_list,
-        "cal_sum": cal_sum,
-        "gender_set_count": gender_set_count,
-        "gender_set": gender_set,
-        "current_date": current_date,
-        "page_obj": page_obj,
-    })
+    if request.user.is_authenticated:
+        playground = Playground.objects.get(pk=request.user.playground.id)
+        details_min_date_dict = PlaygroundDetail.objects.filter(playground=playground).aggregate(Min("date", default=date.today()))
+        details_min_date = details_min_date_dict["date__min"]
+        today = datetime.today()
+        months = ((today.year - details_min_date.year)*12 + today.month - details_min_date.month)
+        months_list = [month for month in range(months+1)]
+        paginator = Paginator(months_list, 1)
+        page_number = request.GET.get("page")
+        try:
+            current_date = date(date.today().year, date.today().month-int(page_number)+1, date.today().day)
+        except TypeError:
+            current_date = today
+        page_obj = paginator.get_page(page_number)
+        gender_set = Customer.objects.filter(playground=playground, end_time__month=current_date.month, end_time__year=current_date.year, status='finished')
+        newcomer_f = newcomer_m = returning_f = returning_m = 0
+        for g in gender_set:
+            if g.customer_type == "newcomer" and g.gender == "female":
+                newcomer_f += 1
+            elif g.customer_type == "newcomer" and g.gender == "male":
+                newcomer_m += 1
+            elif g.customer_type == "returning" and g.gender == "female":
+                returning_f += 1
+            elif g.customer_type == "returning" and g.gender == "male":
+                returning_m += 1
+        gender_set_count = [newcomer_f, newcomer_m, returning_f, returning_m]                
+        
+        query_set = PlaygroundDetail.objects.filter(playground=playground, date__month=current_date.month, date__year=current_date.year)
+        query_set_dates = []
+        query_set_price = []
+        for q in query_set:
+            query_set_dates.append(q.date)
+            query_set_price.append(q.total_amount)
+        cal = calendar.Calendar()
+        cal_list = []
+        cal_sum = []
+        for i in cal.itermonthdates(current_date.year, current_date.month):
+            if i.month == current_date.month:
+                cal_list.append(i.day)
+                try:
+                    k = query_set_dates.index(i)
+                    cal_sum.append(float(query_set_price[k]))
+                except ValueError:
+                    cal_sum.append(0)
+        return render(request, "customers/charts.html", {
+            "cal_list": cal_list,
+            "cal_sum": cal_sum,
+            "gender_set_count": gender_set_count,
+            "gender_set": gender_set,
+            "current_date": current_date,
+            "page_obj": page_obj,
+        })
+    else:
+        return HttpResponseForbidden("You are not authorized to see this page")
+
+
+"""NOTIFICATION VIEWS"""
+def notification(request):
+    if request.user.is_owner:
+        playground = Playground.objects.get(pk=request.user.playground.id)
+        notifications = User.objects.filter(playground=playground, is_permission_given=False)
+        employees = User.objects.filter(playground=playground, is_permission_given=True, is_owner=False)
+        if request.htmx:
+            counter = notifications.count()
+            return HttpResponse(counter if counter > 0 else "")
+        elif request.method == "GET":
+            return render(request, "customers/notifications.html", {
+                "notifications": notifications,
+                "employees": employees,
+                })
+    else:
+        return HttpResponseForbidden()
+
+@require_POST
+def notification_update(request, id):
+    print(request.POST)
+    if not User.objects.get(pk=id).is_owner:
+        user = User.objects.get(pk=id)
+    else:
+        HttpResponseBadRequest()
+    if "authorize" in request.POST:
+        user.is_permission_given = True
+        user.save(update_fields=["is_permission_given"])
+    elif "unauthorize" in request.POST:
+        user = User.objects.get(pk=id)
+        user.is_permission_given = False
+        user.save(update_fields=["is_permission_given"])
+    playground = Playground.objects.get(pk=request.user.playground.id)
+    notifications = User.objects.filter(playground=playground, is_permission_given=False)
+    employees = User.objects.filter(playground=playground, is_permission_given=True, is_owner=False)
+    return render(request, "customers/notifications-notification.html", {
+        "notifications": notifications,
+        "employees": employees,
+        })
 
 
 """ENTERING VIEWS"""
 def login_view(request):
     if request.method == "POST":
-
         # Attempt to sign user in
         username = request.POST["username"]
         password = request.POST["password"]
+        print(password)
         user = authenticate(request, username=username, password=password)
-
+        print(user)
         # Check if authentication successful
         if user is not None:
             login(request, user)
@@ -237,11 +285,15 @@ def logout_view(request):
     logout(request)
     return HttpResponseRedirect(reverse("index"))
 
-
 def register(request):
     if request.method == "POST":
         username = request.POST["username"]
-        email = request.POST["email"]
+        is_owner = request.POST.get('is_owner', False)
+        print(is_owner)
+        if is_owner == "on":
+            is_owner = True
+        playroom = request.POST["playroom"]
+        print(is_owner)
 
         # Ensure password matches confirmation
         password = request.POST["password"]
@@ -250,10 +302,33 @@ def register(request):
             return render(request, "customers/register.html", {
                 "message": "Passwords must match."
             })
-
         # Attempt to create new user
+        if is_owner == True:
+            try:
+                Playground.objects.filter(name__iexact=playroom.lower())[0]
+                return render(request, "customers/register.html", {
+                    "message": "Playroom name already taken"
+                })
+            except (ObjectDoesNotExist, IndexError):
+                playground = Playground.objects.create(name=playroom)
+                playground.save()
+                is_permission_given = True
+        elif is_owner == False:
+            try:
+                playground = Playground.objects.filter(name__iexact=playroom.lower())[0]
+                is_permission_given = False
+            except (ObjectDoesNotExist, IndexError):
+                return render(request, "customers/register.html", {
+                    "message": "Playroom with this name doesn't exist"
+                })
         try:
-            user = User.objects.create_user(username, email, password)
+            user = User.objects.create(
+                username=username, 
+                password=make_password(password),
+                playground = playground,
+                is_owner = is_owner,
+                is_permission_given = is_permission_given
+                )
             user.save()
         except IntegrityError:
             return render(request, "customers/register.html", {

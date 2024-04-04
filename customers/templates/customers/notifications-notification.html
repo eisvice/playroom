@@ -1,0 +1,41 @@
+<div id="notification-container">
+    {% if notifications.count != 0 %}
+        <div class="container text-center">
+            <h4>Waiting for permission</h4>
+            <br>
+            {% for notification in notifications %}
+                <div class="row justify-content-center">
+                    <div class="col-2">
+                        {{notification}}
+                    </div>
+                    <div class="col-2">
+                        <form id="give-permission" name="give-permission" hx-post="{% url 'notifications-update' notification.id%}" hx-target="#notification-container" hx-swap="outerHTML">
+                            <input type="hidden" name="notification-id" value="{{notification.id}}">
+                            <input name="authorize" type="submit" class="btn btn-primary btn-sm" value="Authorize">
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if employees.count != 0 %}
+        <div id="employees-list" class="container text-center">
+            <h4>Employees</h4>
+            <br>
+            {% for employee in employees %}
+                <div class="row justify-content-center">
+                    <div class="col-2">
+                        {{employee}}
+                    </div>
+                    <div class="col-2">
+                        <form id="remove-permission" name="remove-permission" hx-post="{% url 'notifications-update' employee.id%}" hx-target="#notification-container" hx-swap="outerHTML">
+                            <input type="hidden" name="notification-id" value="{{notification.id}}">
+                            <input name="unauthorize" type="submit" class="btn btn-primary btn-sm" value="Unauthorize">
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>    
+    {% endif %}
+</div>
