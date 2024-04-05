@@ -1,11 +1,12 @@
 {% extends "customers/layout.html" %}
+{% load static %}
 
 
 {% block body %}
     {% if user.is_permission_given %}
         <div class="container text-center">
             <h1>Current Activity</h1>
-            <p>Choose who just came in</p>
+            <p>Choose Who Just Came In</p>
         </div>
 
         {% include 'customers/buttongroup.html' %}

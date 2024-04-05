@@ -1,16 +1,16 @@
 <div class="container-fluid">
     <div class="row text-center" id="buttons">
         <div class="col-sm-6" id="new-customer">
-            <h4>First-time customers </h4>
+            <h4>First-Time Customers </h4>
             <button id="add-new-male" class="btn btn-outline-light btn-icon" name="add-customer" value="gender=male&customer_type=newcomer" hx-post="{% url 'customers' %}" hx-trigger="click" hx-swap="none">
                 <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-4/128/Male-user-add-icon.png" width="64" height="64" class="img-circle" alt="boy">
-            </button>
+            </button>but
             <button id="add-new-female" class="btn btn-outline-light btn-icon" name="add-customer" value="gender=female&customer_type=newcomer" hx-post="{% url 'customers' %}" hx-trigger="click" hx-swap="none">
                 <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-5/128/Female-user-add-icon.png" width="64" height="64" class="img-circle" alt="girl">
             </button>
         </div>
         <div class="col-sm-6">
-            <h4>Returning customers</h4>
+            <h4>Returning Customers</h4>
             <button id="add-returning-male" class="btn btn-outline-light btn-icon" name="add-customer" value="gender=male&customer_type=returning" hx-post="{% url 'customers' %}" hx-trigger="click" hx-swap="none">
                 <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-4/128/Male-user-add-icon.png" width="64" height="64" class="img-circle" alt="boy">
             </button>

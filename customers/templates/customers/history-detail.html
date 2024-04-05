@@ -7,19 +7,8 @@
                 <th id="cost-{{row.id}}" class="price-paid" style="color: #0fc718;">
                     +{{ row.cost }}
                 </th>
-                <!-- <td><input type="text" value="{{row.cost}}"></td> -->
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td style="text-align: left;"> {{row.start_time|time}} - {{row.end_time|time}} </td>
-                {% if row.hours == 1 %}
-                <td> {{row.hours}} hour </td>
-                {% else %}
-                <td> {{row.hours}} hours </td>
-                {% endif %}
                 <td style="text-align: left;">
-                    <button type="button" class="btn" onclick="editDetail(this, {{row.id}})"><i class="fa-solid fa-pen" style="color: #B197FC;"></i></button>
+                    <button type="button" class="btn btn-sm btn-pencil" onclick="editDetail(this, {{row.id}})"><i class="fa-solid fa-pen" style="color: #B197FC;"></i></button>
                     <form id="edit-customer-detail" hx-post="{% url 'history-update' row.id%}" hx-swap="outerHTML" hx-target="closest .day-info" style="display: none;">
                         {% csrf_token %}
                         <input id="price-field-edit-{{row.id}}" class="price-field-edit form-control form-control-sm" onfocus="this.select();" name="price" value="{{row.cost}}" type="number" min="0">
@@ -27,6 +16,22 @@
                     </form>
                     <button class="btn btn-info btn-sm" style="display: none" onclick="cancelDetail(this, {{row.id}})">Cancel</button>
                 </td>
+                <!-- <td><input type="text" value="{{row.cost}}"></td> -->
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td> {{ row.payment }} </td>
+                <td> {{ row.bank }} </td>
+            </tr>
+            <tr>
+                <td style="text-align: left;"> {{row.start_time|time}} - {{row.end_time|time}} </td>
+                {% if row.hours == 1 %}
+                <td> {{row.hours}} hour </td>
+                {% else %}
+                <td> {{row.hours}} hours </td>
+                {% endif %}
+
 
             </tr>
         </tbody>

@@ -1,10 +1,12 @@
 import json
 import calendar
+import os
 from django.urls import reverse
 from json import JSONDecodeError
 from django.shortcuts import render
 from django.db import IntegrityError
 from django.core.paginator import Paginator
+from django.templatetags.static import static
 from django.db.models import Min, Max, Sum, Q
 from datetime import datetime, timedelta, date
 from django.template.loader import render_to_string
@@ -21,6 +23,10 @@ def index(request):
     if request.user.is_authenticated and not request.user.is_permission_given:
         return render(request, "customers/index.html", {"message": "Please wait untill you are being given a permission to see this site"})
     elif request.user.is_authenticated:
+        module_dir = os.path.dirname(__file__)
+        file_path = os.path.join(module_dir, static("sounds/cashregister.wav"))
+        print(file_path)
+        print(static('sounds'))
         customers = Customer.objects.filter(playground=request.user.playground.id).filter(Q(status='active') | Q(status='await'))
         context = {"customers": customers}
         return render(request, "customers/index.html", context)
@@ -88,7 +94,17 @@ def update_info(request, id):
         if len(data) == 1 and data["status"]:
             customer.status = data["status"]
             customer.save(update_fields=["status"])
-            return JsonResponse({"message": f"User has status '{customer.status}'"}, status=201)
+            
+            
+            # audio_file_path = static('sounds/cashregister.wav')
+
+            # with open(audio_file_path, 'rb') as f:
+            #     audio_data = f.read()
+            
+            # response = HttpResponse(audio_data, content_type='audio/wav')
+            # response['Content-Disposition'] = 'inline; filename="cashregister.wav"'
+            # return response
+            return JsonResponse({"message": "allright"})
         elif len(data) > 1:
             try:
                 duration = float(data["duration"])
@@ -96,10 +112,13 @@ def update_info(request, id):
                 duration = customer.hours
             customer.name = data["name"]
             customer.gender = data["gender"]
+            customer.payment = data["payment"]
+            if data["bank"] != "none" or data["bank"] != None:
+                customer.bank = data["bank"]
             customer.customer_type = data["customer_type"]
             customer.hours = duration
             customer.end_time = customer.start_time + timedelta(minutes=duration)
-            customer.save(update_fields=["name", "gender", "customer_type", "hours", "end_time"])
+            customer.save(update_fields=["name", "gender","payment", "bank", "customer_type", "hours", "end_time"])
             context = {"customers": Customer.objects.filter(Q(status='active') | Q(status='await'))}
         return render(request, "customers/index.html", context)
 

@@ -29,6 +29,8 @@ class Customer(models.Model):
     name = models.CharField(max_length=100)
     hours = models.DecimalField(max_digits=4, decimal_places=2, default=1.0)
     status = models.CharField(max_length=20, default="active")
+    payment = models.CharField(max_length=10, default="cash")
+    bank = models.CharField(max_length=20, blank=True, null=True)
     start_time = models.DateTimeField(auto_now_add=True)
     end_time = models.DateTimeField()
     cost = models.DecimalField(max_digits=6, decimal_places=2)
@@ -54,6 +56,8 @@ class Customer(models.Model):
             "id": self.id,
             "name": self.name,
             "gender": self.gender,
+            "payment": self.payment,
+            "bank": self.bank,
             "customer_type": self.customer_type,
             "hours": self.hours,
             "start_time": self.start_time,

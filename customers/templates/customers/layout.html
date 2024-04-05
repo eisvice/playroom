@@ -15,7 +15,7 @@
         
         <!-- Static links -->
         <link href="{% static 'customers/styles.css' %}" rel="stylesheet">
-        <script src="{% static 'customers/timer.js' %}"></script>
+        <script src="{% static 'customers/timer.js' %}" data-cash-register-sound="{% static 'sounds/bell.wav' %}"></script>
 
         <!-- Favicon -->
         <link rel="shortcut icon" href="{% static 'images/playground.ico' %}" />
@@ -26,36 +26,33 @@
     <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <div class="container-fluid">
-              <a class="navbar-brand" href="{% url 'index' %}">Lazy Accountant</a>
+              <a class="navbar-brand" href="{% url 'index' %}">Lazy Accountant ♢ {{ user.playground.name }}</a>
               <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
               </button>
               <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                 {% if user.is_authenticated %}
                   <li class="nav-item">
-                    <span class="nav-link" style="font-weight: bolder; color: rgba(0, 0, 0, .7);"><strong>{{ user.playground.name }}</strong></span>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="{% url 'history' %}">Daily History</a>
+                    <a class="nav-link" href="{% url 'history' %}">DAILY HISTORY</a>
                   </li>
                   {% if user.is_owner %}
                     <li class="nav-item">
-                      <a class="nav-link" href="{% url 'charts' %}">Statistics</a>
+                      <a class="nav-link" href="{% url 'charts' %}">STATISTICS</a>
                     </li>
                     <li class="nav-item"  hx-get="{% url 'notifications' %}" hx-trigger="load" hx-target="#notifications-counter" hx-swap="innerHTML">
-                      <a class="nav-link" href="{% url 'notifications' %}">Notifications <span id="notifications-counter" class="badge text-bg-info"></span></a>
+                      <a class="nav-link" href="{% url 'notifications' %}">NOTIFICATIONS <span id="notifications-counter" class="badge text-bg-info"></span></a>
                     </li>
                   {% endif %}
                   <li class="nav-item">
-                    <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
+                    <a class="nav-link" href="{% url 'logout' %}">LOG OUT</a>
                   </li>
                   {% else %}
                   <li class="nav-item">
-                    <a class="nav-link" href="{% url 'login' %}">Log In</a>
+                    <a class="nav-link" href="{% url 'login' %}">LOG IN</a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link" href="{% url 'register' %}">Register</a>
+                    <a class="nav-link" href="{% url 'register' %}">REGISTER</a>
                   </li>
                   {% endif %}
                 </ul>

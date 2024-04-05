@@ -1,3 +1,71 @@
+/* main components */
+body {
+  font: 400 15px Lato, sans-serif;
+  line-height: 1.8;
+  color: #818181;
+}
+
+h1 {
+  font-size: 24px;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-top: 30px;
+  font-family: Montserrat, sans-serif;
+  color: #616161;
+  letter-spacing: 4px;
+}
+h3 {
+  font-size: 21px;
+  line-height: 1.375em;
+  color: #616161;
+  font-weight: 400;
+  letter-spacing: 2px;
+}
+h4 {
+  font-size: 19px;
+  line-height: 1.375em;
+  color: #616161;
+  font-weight: 400;
+  letter-spacing: 3px;
+}
+
+/* layout */
+.navbar {
+  background-color: #f4511e !important;
+  font-family: Montserrat, sans-serif;
+  z-index: 9999;
+  border: 0;
+  font-size: 12px !important;
+  line-height: 1.42857143 !important;
+  letter-spacing: 4px;
+  border-radius: 0;
+  padding: 0;
+}
+
+.navbar .container-fluid {
+  padding:0;
+}
+
+.navbar .container-fluid .navbar-brand {
+  padding:0 15px;
+}
+
+.navbar li a, .navbar span, .navbar .navbar-brand {
+  color: #fff !important;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+.navbar-nav li a:hover, .navbar-nav li.active a {
+  color: #f4511e !important;
+  background-color: #fff !important;
+}
+
+.navbar-default .navbar-toggle {
+  border-color: transparent;
+  color: #fff !important;
+}
+
 .message-after-form {
   margin-top: 12px;
   margin-bottom: 12px;
@@ -47,6 +115,13 @@
 }
 
 
+.btn-pencil {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  padding-left: 2px !important;
+}
+
+
 .finish-btn {
   display: none;
 }
@@ -85,7 +160,6 @@ table, td, th {
 }
 
 td {
-  padding-bottom: 6px;
   color: #616161;
   font-size: smaller;
 }

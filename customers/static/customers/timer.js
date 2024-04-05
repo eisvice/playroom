@@ -1,16 +1,27 @@
+const cashRegisterSoundURL = document.currentScript.getAttribute('data-cash-register-sound');
+const audio = new Audio(cashRegisterSoundURL);
+
 document.addEventListener('DOMContentLoaded', function() {
     
     const currentUrl = window.location.href;
-    console.log(currentUrl); 
+    console.log(currentUrl);
+
 
     if (currentUrl === 'http://127.0.0.1:8000/' && !document.getElementById('wait-message')) {
         const exampleModal = document.getElementById('modal-customer-view');
         const duration = exampleModal.querySelector('#time-given');
+        const payment = exampleModal.querySelector('#payment-type');
         const saveChange = exampleModal.querySelector('#save-modal');
+        const bank = exampleModal.querySelector('#bank-name');
         
         document.body.addEventListener('htmx:oobAfterSwap', function(evt) {
             const content = evt.detail.target.lastElementChild.querySelector('.button-content');
+            audio.play().then(() => { // pause directly
+                audio.pause();
+                audio.currentTime = 0;
+              });
             startTimer(content);
+            // playStopSound();
         });
     
         document.addEventListener('htmx:afterRequest', function(evt) {
@@ -48,8 +59,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     })
                     .then(response => response.json())
                     .then(result => {
-                    // Print result
-                    console.log(result);
+                        // Print result
+                        console.log(result);
                     });
                     startTimer(content);
                 }
@@ -101,6 +112,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log(customer.id);
                 name.value = customer.name;
                 gender.value = customer.gender.toLowerCase();
+                payment.value = customer.payment;
+                handlePaymentChange(bank, payment);
+                bank.value = customer.bank;
+                console.log(customer.gender, customer.payment, customer.bank);
                 type.value = customer.customer_type.toLowerCase();
                 console.log(customer.hours);
                 duration.value = customer.hours;
@@ -117,6 +132,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     body: JSON.stringify({
                         name: name.value,
                         gender: gender.value,
+                        payment: payment.value,
+                        bank: bank.value,
                         customer_type: type.value,
                         duration: duration.value
                     })
@@ -128,13 +145,17 @@ document.addEventListener('DOMContentLoaded', function() {
             kidAvatar.src = image.src;
         });
         
-        duration.addEventListener('change', (event) => {
+        duration.onchange = function ()  {
             const endTimeStr = exampleModal.querySelector('#end-time-field');
             const startTimeStr = exampleModal.querySelector('#start-time-field');
             let startTime = new Date(startTimeStr.value).getTime();
             durationMilliseconds = parseFloat(duration.value)*60*1000;
             endTimeStr.value = new Date(startTime + durationMilliseconds).toLocaleString();
-        });
+        };
+
+        payment.onchange = function() {
+            handlePaymentChange(bank, payment)
+        };
     }
 });
 
@@ -208,10 +229,10 @@ function startTimer(contentElement) {
             })
             .then(response => response.json())
             .then(result => {
-              // Print result
-              console.log(result);
+                console.log(result)
             });
             stopTimer();
+            return playStopSound();
         }
 
     }
@@ -252,7 +273,7 @@ function editDetail(button, id) {
     document.getElementById(`price-field-edit-${id}`).focus();
     cancelBtn = form.nextElementSibling;
     cancelBtn.style.display = 'inline';
-}
+};
 
 function cancelDetail(button, id) {
     const th = document.querySelector(`#cost-${id}`);
@@ -261,6 +282,27 @@ function cancelDetail(button, id) {
     button.style.display = 'none';
     form.style.display = 'none';
     editBtn.style.display = 'inline';
-    th.style.display = 'inline';
+    th.style.display = 'table-cell';
     document.getElementById(`price-field-edit-${id}`).value = parseFloat(th.innerHTML);
+};
+
+function handlePaymentChange(bank, payment) {
+    bank.setAttribute("disabled", "disabled");
+    bank.value = 'none';
+    bank.innerHTML = '';
+    if (payment.value === 'card') {
+        bank.removeAttribute("disabled");
+        let bank1 = document.createElement('option');
+        bank1.value = 'bank1';
+        bank1.innerHTML = 'Bank 1';
+        let bank2 = document.createElement('option');
+        bank2.value = 'bank2';
+        bank2.innerHTML = 'Bank 2';
+        bank.append(bank1, bank2);
+    }
+};
+
+
+function playStopSound() {
+    audio.play();
 }
