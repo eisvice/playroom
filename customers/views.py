@@ -1,6 +1,7 @@
 import json
 import calendar
 import os
+from django import forms
 from django.urls import reverse
 from json import JSONDecodeError
 from django.shortcuts import render
@@ -16,7 +17,19 @@ from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.http import require_POST, require_safe
 from customers.models import User, Playground, Customer, PlaygroundDetail
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, JsonResponse, HttpResponseForbidden
-        
+
+
+class CustomerForm(forms.Form):
+    PAYMENT_CHOICES = (
+        ("cash", "Cash"),
+        ("card", "Card")
+    )
+    BANK_CHOICES = (
+        ("bank1", "Bank 1"),
+        ("bank2", "Bank 2"),
+    )
+    payment = forms.ChoiceField(choices=PAYMENT_CHOICES)
+    bank = forms.ChoiceField(choices=BANK_CHOICES)
 
 """HOME PAGE VIEWS"""
 def index(request):
@@ -158,7 +171,10 @@ def history_detail(request, id):
     playground_detail = PlaygroundDetail.objects.get(pk=id)
     rows = Customer.objects.filter(playground_detail=playground_detail, status="finished").order_by("-end_time")
     print(playground_detail.id)
-    return render(request, "customers/history-detail.html", {"rows": rows})
+    return render(request, "customers/history-detail.html", {
+        "rows": rows,
+        "form": CustomerForm(),
+        })
 
 @require_POST
 def history_update_details(request, id):
@@ -166,9 +182,13 @@ def history_update_details(request, id):
     playground_detail = PlaygroundDetail.objects.get(id=customer.playground_detail.id)
     try:
         price = float(request.POST["price"])
+        payment = request.POST["payment"]
+        bank = request.POST.get('bank', None)
         if price > 0:
             customer.cost = price
-            customer.save(update_fields=["cost"])
+            customer.payment = payment
+            customer.bank = bank
+            customer.save(update_fields=["cost", "payment", "bank"])
             customers_day_total = Customer.objects.filter(playground_detail=playground_detail, status="finished").aggregate(Sum("cost"))
             playground_detail.total_amount = float(customers_day_total["cost__sum"])
             playground_detail.save(update_fields=["total_amount"])

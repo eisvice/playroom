@@ -2,34 +2,65 @@
 <table>
 {% for row in rows %}
         <thead>
-            <tr>
+            <tr style="padding-top: 20px;">
                 <th style="text-align: left;"> {{ row.name }} </th>
-                <th id="cost-{{row.id}}" class="price-paid" style="color: #0fc718;">
-                    +{{ row.cost }}
+                <th class="price-paid" style="color: #0fc718;">
+                    +{{ row.cost|floatformat }}
                 </th>
-                <td style="text-align: left;">
-                    <button type="button" class="btn btn-sm btn-pencil" onclick="editDetail(this, {{row.id}})"><i class="fa-solid fa-pen" style="color: #B197FC;"></i></button>
-                    <form id="edit-customer-detail" hx-post="{% url 'history-update' row.id%}" hx-swap="outerHTML" hx-target="closest .day-info" style="display: none;">
-                        {% csrf_token %}
-                        <input id="price-field-edit-{{row.id}}" class="price-field-edit form-control form-control-sm" onfocus="this.select();" name="price" value="{{row.cost}}" type="number" min="0">
-                        <button class="btn btn-info btn-sm" type="submit">Save</button>
-                    </form>
-                    <button class="btn btn-info btn-sm" style="display: none" onclick="cancelDetail(this, {{row.id}})">Cancel</button>
-                </td>
-                <!-- <td><input type="text" value="{{row.cost}}"></td> -->
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td> {{ row.payment }} </td>
-                <td> {{ row.bank }} </td>
+                <td style="text-align: left;"> {{ row.payment }} </td>
+                <td>
+                    {% if row.bank %}
+                        {{ row.bank }}
+                    {% endif %}
+                </td>
+                <td class="btn-pencil-cell">
+                    <button type="button" class="btn btn-sm btn-pencil" onclick="editDetail(this.closest('tbody'), {{row.id}}); "><i class="fa-solid fa-pen" style="color: #B197FC;"></i></button>
+                </td>
+            </tr>
+            <tr class="form-row" style="display: none;">
+                <td class="form-td">
+                    <form hx-post="{% url 'history-update' row.id%}" hx-swap="outerHTML" hx-target="closest .day-info">
+                        {% csrf_token %}
+                        <input class="form-control form-control-sm price-input" name="price" value="{{row.cost|floatformat}}" type="number" min="0">
+                        <select class="form-control form-control-sm payment-select" name="payment" type="text" onchange="handlePaymentChange(this.nextElementSibling, this)">
+                            {%for option in form.payment.field.choices %}
+                                {% if row.payment == option.0 %}
+                                    <option value="{{option.0}}" selected>{{option.1}}</option>
+                                {% else %}
+                                    <option value="{{option.0}}">{{option.1}}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                        {% if not row.bank %}
+                        <select class="form-control form-control-sm bank-select" name="bank" type="text" disabled>
+                            <option value="none"></option>
+                        </select>
+                        {% else %}
+                        <select class="form-control form-control-sm bank-select" name="bank" type="text">
+                            {%for option in form.bank.field.choices %}
+                                {% if row.bank == option.0 %}
+                                    <option value="{{option.0}}" selected>{{option.1}}</option>
+                                {% else %}
+                                    <option value="{{option.0}}">{{option.1}}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                        {% endif %}
+                        <button class="btn btn-info btn-sm" type="submit">Save</button>
+                        <button class="btn btn-info btn-sm" type="button" onclick="cancelDetail(this.closest('tbody'), {{row.id}}, {{row.cost}})">Cancel</button>
+                    </form>
+                </td>
             </tr>
             <tr>
-                <td style="text-align: left;"> {{row.start_time|time}} - {{row.end_time|time}} </td>
+                <td class="last-row" style="text-align: left;"> {{row.start_time|time}} - {{row.end_time|time}} </td>
                 {% if row.hours == 1 %}
-                <td> {{row.hours}} hour </td>
+                <td class="last-row"> {{row.hours|floatformat}} hour </td>
                 {% else %}
-                <td> {{row.hours}} hours </td>
+                <td class="last-row"> {{row.hours|floatformat}} hours </td>
                 {% endif %}
 
 

@@ -41,7 +41,7 @@
                       <a class="nav-link" href="{% url 'charts' %}">STATISTICS</a>
                     </li>
                     <li class="nav-item"  hx-get="{% url 'notifications' %}" hx-trigger="load" hx-target="#notifications-counter" hx-swap="innerHTML">
-                      <a class="nav-link" href="{% url 'notifications' %}">NOTIFICATIONS <span id="notifications-counter" class="badge text-bg-info"></span></a>
+                      <a class="nav-link" href="{% url 'notifications' %}">NOTIFICATIONS<span id="notifications-counter" class="badge text-bg-info"></span></a>
                     </li>
                   {% endif %}
                   <li class="nav-item">

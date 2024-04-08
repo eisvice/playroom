@@ -1,22 +1,42 @@
-<div class="container-fluid">
+{% load static %}
+<div class="container text-center">
     <div class="row text-center" id="buttons">
         <div class="col-sm-6" id="new-customer">
             <h4>First-Time Customers </h4>
-            <button id="add-new-male" class="btn btn-outline-light btn-icon" name="add-customer" value="gender=male&customer_type=newcomer" hx-post="{% url 'customers' %}" hx-trigger="click" hx-swap="none">
-                <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-4/128/Male-user-add-icon.png" width="64" height="64" class="img-circle" alt="boy">
-            </button>but
-            <button id="add-new-female" class="btn btn-outline-light btn-icon" name="add-customer" value="gender=female&customer_type=newcomer" hx-post="{% url 'customers' %}" hx-trigger="click" hx-swap="none">
-                <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-5/128/Female-user-add-icon.png" width="64" height="64" class="img-circle" alt="girl">
-            </button>
         </div>
         <div class="col-sm-6">
             <h4>Returning Customers</h4>
-            <button id="add-returning-male" class="btn btn-outline-light btn-icon" name="add-customer" value="gender=male&customer_type=returning" hx-post="{% url 'customers' %}" hx-trigger="click" hx-swap="none">
-                <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-4/128/Male-user-add-icon.png" width="64" height="64" class="img-circle" alt="boy">
+        </div>
+    </div>
+    <div class="row justify-content-around">
+        <div class="col col-sm-6">
+            <button id="add-new-male" class="btn btn-outline-light btn-icon" name="add-customer" value="gender=male&customer_type=newcomer" hx-post="{% url 'customers' %}" hx-trigger="click" hx-swap="none">
+                <figure>
+                    <img class="img-thumbnail" src="{% static 'images/alien_boy.png' %}" width="86" height="86" alt="boy">
+                    <figcaption class="figure-img img-fluid rounded">Add Boy</figcaption>
+                </figure>
             </button>
-            <button id="add-returning-female" class="btn btn-outline-light btn-icon" name="add-customer" value="gender=female&customer_type=returning" hx-post="{% url 'customers' %}" hx-trigger="click" hx-swap="none">
-                <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-5/128/Female-user-add-icon.png" width="64" height="64" class="img-circle" alt="girl">
+            <button id="add-new-female" class="btn btn-outline-light btn-icon" name="add-customer" value="gender=female&customer_type=newcomer" hx-post="{% url 'customers' %}" hx-trigger="click" hx-swap="none">
+                <figure>
+                    <img class="img-thumbnail" src="{% static 'images/alien_girl.png' %}" width="86" height="86" alt="girl">
+                    <figcaption class="figure-img img-fluid rounded">Add Girl</figcaption>
+                </figure>
             </button>
         </div>
+        <div class="col col-sm-6">
+            <button id="add-returning-male" class="btn btn-outline-light btn-icon" name="add-customer" value="gender=male&customer_type=returning" hx-post="{% url 'customers' %}" hx-trigger="click" hx-swap="none">
+                <figure>
+                    <img class="img-thumbnail" src="{% static 'images/alien_boy.png' %}" width="86" height="86" alt="boy">
+                    <figcaption class="figure-img img-fluid rounded">Add Boy</figcaption>
+                </figure>
+            </button>            
+            <button id="add-returning-female" class="btn btn-outline-light btn-icon" name="add-customer" value="gender=female&customer_type=returning" hx-post="{% url 'customers' %}" hx-trigger="click" hx-swap="none">
+                <figure>
+                    <img class="img-thumbnail" src="{% static 'images/alien_girl.png' %}" width="86" height="86" alt="girl">
+                    <figcaption class="figure-img img-fluid rounded">Add Girl</figcaption>
+                </figure>
+            </button>
+        </div>
+
     </div>
 </div>

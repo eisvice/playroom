@@ -6,7 +6,7 @@
     {% if user.is_permission_given %}
         <div class="container text-center">
             <h1>Current Activity</h1>
-            <p>Choose Who Just Came In</p>
+            <p>Choose Who Just Landed</p>
         </div>
 
         {% include 'customers/buttongroup.html' %}
@@ -23,10 +23,6 @@
         </div>
     {% else %}
         <div id="wait-message" class="container text-center">
-            <br>
-            <br>
-            <br>
-            <br>
             <h3>{{message}}</h3>
         </div>
     {% endif %}

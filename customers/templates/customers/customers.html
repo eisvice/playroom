@@ -1,5 +1,9 @@
+{% load static %}
 <div class="row activity-row" id="customer-list"> 
     <h3>Kids in the playing room</h3>
+    <div id="empty-picture" class="container" style="display:none;">
+        <img src="{% static 'images/bucket.png' %}" style="border-radius:0%;width: 128px; height:128px;">
+    </div>
     {%for customer in customers %}
         {% include 'customers/customer.html' %}
     {% endfor %}

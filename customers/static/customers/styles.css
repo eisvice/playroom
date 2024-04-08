@@ -33,7 +33,6 @@ h4 {
 .navbar {
   background-color: #f4511e !important;
   font-family: Montserrat, sans-serif;
-  z-index: 9999;
   border: 0;
   font-size: 12px !important;
   line-height: 1.42857143 !important;
@@ -66,6 +65,13 @@ h4 {
   color: #fff !important;
 }
 
+.navbar span {
+  padding-top: 3px;
+  padding-bottom: 2px;
+  padding-right: 3px;
+  display: inline;
+}
+
 .message-after-form {
   margin-top: 12px;
   margin-bottom: 12px;
@@ -75,28 +81,41 @@ h4 {
     padding: 10px 50px;
   }
 
-  .activity-container {
-    border: 1px solid black;
-    min-height: 200px;
-    border-radius: 10px;
-    padding-top: 20px;
-    padding-bottom: 20px;
-    margin-bottom: 20px;
-  }
-
-.activity-row img {
-    border-radius: 64px;
+.activity-container {
+  border: 0px solid #acacac;
+  min-height: 200px;
+  border-radius: 10px;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  box-shadow: -2px -3px 40px -26px rgba(244,81,30,0.75) inset;
+  -webkit-box-shadow: -2px -3px 40px -26px rgba(244,81,30,0.75) inset;
+  -moz-box-shadow: -2px -3px 40px -26px rgba(244,81,30,0.75) inset;
 }
 
-.btn-icon {
-    padding: 0;
-    border-radius: 64px;
+
+.activity-row img {
+    border-radius: 50%;
+    width: 96px;
+    height: 96px;
+}
+
+.btn-customer {
+  border-radius: 50%; 
+  padding: 0;
+}
+
+figcaption {
+  font: 400 15px Lato, sans-serif;
+  letter-spacing: 2px;
+  margin-top: 3px;
 }
 
 .modal-body .row {
     margin-top: 10px;
     margin-bottom: 10px;
 }
+
 
 
 .button-content {
@@ -129,6 +148,11 @@ h4 {
 
 table, td, th {
   border: 0px solid black;
+  padding: 0;
+}
+
+.last-row {
+  padding-bottom: 10px;
 }
 
 
@@ -187,4 +211,34 @@ td {
 
 .round {
   border-radius: 50%;
+}
+
+#wait-message {
+  margin-top: 40px;
+}
+
+.btn-info {
+  color: #fff;
+}
+
+.btn-info:hover {
+  color: #fff;
+  text-shadow: rgb(255, 255, 255) 1px 0 10px;;
+}
+
+
+.notification-empty {
+  margin-top: 40px;
+}
+
+#notification-container {
+  margin-top: 30px;
+}
+
+#employees-list {
+  margin-top: 30px;
+}
+
+.row-notification {
+  margin-bottom: 10px;
 }

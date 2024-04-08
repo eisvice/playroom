@@ -6,8 +6,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const currentUrl = window.location.href;
     console.log(currentUrl);
 
-
+    
     if (currentUrl === 'http://127.0.0.1:8000/' && !document.getElementById('wait-message')) {
+        if (!document.querySelector('.customer-info') && document.getElementById('empty-picture').style.display === 'none') {
+            const emptyPicture = document.getElementById('empty-picture'); 
+            emptyPicture.style.display = 'block';
+        }
+        
         const exampleModal = document.getElementById('modal-customer-view');
         const duration = exampleModal.querySelector('#time-given');
         const payment = exampleModal.querySelector('#payment-type');
@@ -15,16 +20,23 @@ document.addEventListener('DOMContentLoaded', function() {
         const bank = exampleModal.querySelector('#bank-name');
         
         document.body.addEventListener('htmx:oobAfterSwap', function(evt) {
+            if (document.getElementById('empty-picture')) {
+                const emptyPicture = document.getElementById('empty-picture'); 
+                emptyPicture.style.display = 'none';
+            };
             const content = evt.detail.target.lastElementChild.querySelector('.button-content');
             audio.play().then(() => { // pause directly
                 audio.pause();
                 audio.currentTime = 0;
               });
             startTimer(content);
-            // playStopSound();
         });
     
         document.addEventListener('htmx:afterRequest', function(evt) {
+            if (!document.querySelector('.customer-info') && document.getElementById('empty-picture').style.display === 'none') {
+                const emptyPicture = document.getElementById('empty-picture'); 
+                emptyPicture.style.display = 'block';
+            }
             if (evt.detail.elt.classList.contains('add-hour-btn')) {
                 const timer = evt.detail.target;
                 const customerInfo = timer.closest('.customer-info');
@@ -263,35 +275,34 @@ function getCookie(name) {
 }
 
 
-function editDetail(button, id) {
-    const form = button.nextElementSibling;
-    const th = document.querySelector(`#cost-${id}`);
-    let cost = parseFloat(th.innerHTML);
-    th.style.display = 'none';
-    button.style.display = 'none';
-    form.style.display = 'inline';
-    document.getElementById(`price-field-edit-${id}`).focus();
-    cancelBtn = form.nextElementSibling;
-    cancelBtn.style.display = 'inline';
+function editDetail(tbody, id) {
+    const btnPencilCell = tbody.querySelector('.btn-pencil-cell');
+    const btnPencil = btnPencilCell.querySelector('button');
+    const formRow = tbody.querySelector('.form-row');
+    const formRowTd = formRow.querySelector('.form-td');
+    const priceInput = tbody.querySelector('.price-input'); 
+    formRowTd.colSpan = '2';
+    btnPencil.style.display = 'none';
+    formRow.style.display = 'contents';
+    priceInput.focus();
+    priceInput.select();
 };
 
-function cancelDetail(button, id) {
-    const th = document.querySelector(`#cost-${id}`);
-    const form = button.previousElementSibling;
-    const editBtn = form.previousElementSibling;
-    button.style.display = 'none';
-    form.style.display = 'none';
-    editBtn.style.display = 'inline';
-    th.style.display = 'table-cell';
-    document.getElementById(`price-field-edit-${id}`).value = parseFloat(th.innerHTML);
+function cancelDetail(tbody, id, cost) {
+    const btnPencilCell = tbody.querySelector('.btn-pencil-cell');
+    const btnPencil = btnPencilCell.querySelector('button');
+    const formRow = tbody.querySelector('.form-row');
+    btnPencil.style.display = 'block';
+    formRow.style.display = 'none';
+    tbody.querySelector('.price-input').value = cost;
 };
 
 function handlePaymentChange(bank, payment) {
-    bank.setAttribute("disabled", "disabled");
+    bank.setAttribute('disabled', 'disabled');
     bank.value = 'none';
     bank.innerHTML = '';
     if (payment.value === 'card') {
-        bank.removeAttribute("disabled");
+        bank.removeAttribute('disabled');
         let bank1 = document.createElement('option');
         bank1.value = 'bank1';
         bank1.innerHTML = 'Bank 1';

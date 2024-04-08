@@ -11,7 +11,7 @@
     {% else %}
         <div class="container-fluid text-center day-info">
     {% endif %}
-            <h3>{{detail.date}} | Total: {{detail.total_amount}}</h3>
+            <h3>{{detail.date}} | Total: {{detail.total_amount|floatformat:"1g"}}</h3>
             {% if error %}
                 <div class="alert alert-warning alert-dismissible fade show" role="alert">
                     {{ error }}
