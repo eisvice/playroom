@@ -107,16 +107,6 @@ def update_info(request, id):
         if len(data) == 1 and data["status"]:
             customer.status = data["status"]
             customer.save(update_fields=["status"])
-            
-            
-            # audio_file_path = static('sounds/cashregister.wav')
-
-            # with open(audio_file_path, 'rb') as f:
-            #     audio_data = f.read()
-            
-            # response = HttpResponse(audio_data, content_type='audio/wav')
-            # response['Content-Disposition'] = 'inline; filename="cashregister.wav"'
-            # return response
             return JsonResponse({"message": "allright"})
         elif len(data) > 1:
             try:
@@ -141,7 +131,10 @@ def finish(request, id):
     playground = Playground.objects.get(pk=request.user.playground.id)
     playground_detail = PlaygroundDetail.objects.filter(id=customer.playground_detail.id, playground=playground)[0]
     customer.status = "finished"
-    customer.cost = float(customer.hours * playground_detail.rate)
+    if customer.hours == 0.5:
+        customer.cost = playground_detail.rate - 50
+    else:
+        customer.cost = float(customer.hours * playground_detail.rate)
     customer.save(update_fields=["status", "cost"])
     customers_day_total = Customer.objects.filter(playground_detail=playground_detail, status="finished").aggregate(Sum("cost"))
     playground_detail.total_amount = float(customers_day_total["cost__sum"])
