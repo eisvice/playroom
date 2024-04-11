@@ -39,7 +39,7 @@ class Customer(models.Model):
     
     def set_end_time(self):
         print(self.start_time, self.hours)
-        self.end_time = datetime.now() + timedelta(minutes=self.hours)
+        self.end_time = datetime.now() + timedelta(hours=self.hours)
 
     def set_name(self):
         self.name = self.customer_type.capitalize()

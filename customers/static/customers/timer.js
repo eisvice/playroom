@@ -159,7 +159,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const endTimeStr = exampleModal.querySelector('#end-time-field');
             const startTimeStr = exampleModal.querySelector('#start-time-field');
             let startTime = new Date(startTimeStr.value).getTime();
-            durationMilliseconds = parseFloat(duration.value)*60*1000;
+            durationMilliseconds = parseFloat(duration.value)*60*60*1000;
             endTimeStr.value = new Date(startTime + durationMilliseconds).toLocaleString();
         };
 
@@ -216,7 +216,6 @@ function startTimer(contentElement) {
         // Update the timer display
         timerElement.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         
-        // let backgroundPercent = (1 - (hours*3600 + minutes*60 + seconds)/(givenHours * 3600 + givenMinutes * 60 + givenSeconds)) * 100;
         let backgroundPercent = (new Date() - startTime)/(endTime - startTime) * 100;
         console.log("Percent:", backgroundPercent);
         
