@@ -43,14 +43,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 let endTimeInit = new Date(endTimeStr);
                 const startTimeStr = timer.dataset.startTime;
                 const startTime = new Date(startTimeStr);
-                timeDifference = Math.round((endTime - startTime)/100/60)/10;
+                timeDifference = Math.round((endTime - startTime)/100/60/60)/10;
                 console.log(timeDifference);
                 let currentTime = new Date();
                 if (timeDifference === parseFloat(0.5)) {
-                    endTime.setMinutes(endTime.getMinutes() + 1);
-                    endTime.setSeconds(endTime.getSeconds() + 30)
+                    endTime.setHours(endTime.getHours() + 1);
+                    endTime.setMinutes(endTime.getMinutes() + 30)
                 } else {
-                    endTime.setMinutes(endTime.getMinutes() + 1);
+                    endTime.setHours(endTime.getHours() + 1);
                 }
                 timer.dataset.endTime = endTime;
                 const content = timer.closest('.button-content');

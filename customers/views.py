@@ -87,9 +87,9 @@ def add_hour(request, id):
         customer.hours = float(customer.hours) + 1.5
     else:
         customer.hours += 1
-    customer.end_time = customer.start_time + timedelta(minutes=float(customer.hours))
+    customer.end_time = customer.start_time + timedelta(hours=float(customer.hours))
     customer.save(update_fields=["hours", "end_time"])
-    return HttpResponse(f"{str(timedelta(minutes=float(customer.hours))).zfill(8)}", status=200)
+    return HttpResponse(f"{str(timedelta(hours=float(customer.hours))).zfill(8)}", status=200)
 
 def update_info(request, id):
     customer = Customer.objects.get(pk=id)
@@ -116,7 +116,7 @@ def update_info(request, id):
                 customer.bank = data["bank"]
             customer.customer_type = data["customer_type"]
             customer.hours = duration
-            customer.end_time = customer.start_time + timedelta(minutes=duration)
+            customer.end_time = customer.start_time + timedelta(hours=duration)
             customer.save(update_fields=["name", "gender","payment", "bank", "customer_type", "hours", "end_time"])
             context = {"customers": Customer.objects.filter(Q(status='active') | Q(status='await'))}
         return render(request, "customers/index.html", context)
