@@ -34,8 +34,8 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '6django-insecure-9ll*evdl)j11c
 DEBUG = os.environ.get('DJANGO_DEBUG', '') != 'False'
 
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ['lazac.pythonanywhere.com', '127.0.0.1']
+CSRF_TRUSTED_ORIGINS = ['https://lazac.pythonanywhere.com']
 
 # Application definition
 
