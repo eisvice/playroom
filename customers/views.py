@@ -1,6 +1,6 @@
+import os
 import json
 import calendar
-import os
 from django import forms
 from django.urls import reverse
 from json import JSONDecodeError
@@ -38,8 +38,6 @@ def index(request):
     elif request.user.is_authenticated:
         module_dir = os.path.dirname(__file__)
         file_path = os.path.join(module_dir, static("sounds/cashregister.wav"))
-        print(file_path)
-        print(static('sounds'))
         customers = Customer.objects.filter(playground=request.user.playground.id).filter(Q(status='active') | Q(status='await'))
         context = {"customers": customers}
         return render(request, "customers/index.html", context)
@@ -85,7 +83,6 @@ def delete_customer(request, id):
 @require_POST
 def add_hour(request, id):
     customer = Customer.objects.get(pk=id)
-    print(customer.hours)
     if float(customer.hours) == 0.5:
         customer.hours = float(customer.hours) + 1.5
     else:
@@ -101,7 +98,6 @@ def update_info(request, id):
     elif request.method == "POST":
         try:
             data = json.loads(request.body)
-            print(data)
         except JSONDecodeError:
             data = ""
         if len(data) == 1 and data["status"]:
@@ -163,7 +159,6 @@ def history_view(request):
 def history_detail(request, id):
     playground_detail = PlaygroundDetail.objects.get(pk=id)
     rows = Customer.objects.filter(playground_detail=playground_detail, status="finished").order_by("-end_time")
-    print(playground_detail.id)
     return render(request, "customers/history-detail.html", {
         "rows": rows,
         "form": CustomerForm(),
@@ -272,7 +267,6 @@ def notification(request):
 
 @require_POST
 def notification_update(request, id):
-    print(request.POST)
     if not User.objects.get(pk=id).is_owner:
         user = User.objects.get(pk=id)
     else:
@@ -299,9 +293,7 @@ def login_view(request):
         # Attempt to sign user in
         username = request.POST["username"]
         password = request.POST["password"]
-        print(password)
         user = authenticate(request, username=username, password=password)
-        print(user)
         # Check if authentication successful
         if user is not None:
             login(request, user)
@@ -321,11 +313,9 @@ def register(request):
     if request.method == "POST":
         username = request.POST["username"]
         is_owner = request.POST.get('is_owner', False)
-        print(is_owner)
         if is_owner == "on":
             is_owner = True
         playroom = request.POST["playroom"]
-        print(is_owner)
 
         # Ensure password matches confirmation
         password = request.POST["password"]

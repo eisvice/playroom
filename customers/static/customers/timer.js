@@ -5,6 +5,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const currentUrl = window.location.href;
     console.log(currentUrl);
+    const currentPath = window.location.pathname;
+    console.log(currentPath);
 
     
     if (currentUrl === 'https://lazac.pythonanywhere.com/' && !document.getElementById('wait-message')) {
