@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log(currentUrl);
 
     
-    if (currentUrl === 'http://127.0.0.1:8000/' && !document.getElementById('wait-message')) {
+    if (currentUrl === 'https://lazac.pythonanywhere.com/' && !document.getElementById('wait-message')) {
         if (!document.querySelector('.customer-info') && document.getElementById('empty-picture').style.display === 'none') {
             const emptyPicture = document.getElementById('empty-picture'); 
             emptyPicture.style.display = 'block';
