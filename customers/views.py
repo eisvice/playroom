@@ -160,7 +160,7 @@ def history_view(request):
 @require_safe
 def history_detail(request, id):
     playground_detail = PlaygroundDetail.objects.get(pk=id)
-    rows = Customer.objects.filter(playground_detail=playground_detail, status="finished").order_by("-end_time")
+    rows = Customer.objects.filter(playground_detail=playground_detail).filter(Q(status='finished') | Q(status='deleted')).order_by("-end_time")
     return render(request, "customers/history-detail.html", {
         "rows": rows,
         "form": CustomerForm(),
