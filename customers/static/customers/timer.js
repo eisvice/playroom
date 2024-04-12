@@ -47,8 +47,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log(timeDifference);
                 let currentTime = new Date();
                 if (timeDifference === parseFloat(0.5)) {
-                    endTime.setHours(endTime.getHours() + 1);
-                    endTime.setMinutes(endTime.getMinutes() + 30)
+                    endTime.setMinutes(endTime.getMinutes() + 30);
                 } else {
                     endTime.setHours(endTime.getHours() + 1);
                 }
@@ -100,13 +99,10 @@ document.addEventListener('DOMContentLoaded', function() {
         exampleModal.addEventListener('show.bs.modal', function (event) {
             // Button that triggered the modal
             const button = event.relatedTarget;
-            console.log(button);
             const timer = button.querySelector('.timer');
             let id = parseInt(timer.id.replace('duration-', ''));
             const image = button.querySelector('img');
-            console.log(exampleModal);
             const name = exampleModal.querySelector('#change-name');
-            console.log(name);
             const gender = exampleModal.querySelector('#gender-field');
             const type = exampleModal.querySelector('#customer-type');
             const startTime = exampleModal.querySelector('#start-time-field');
@@ -118,16 +114,12 @@ document.addEventListener('DOMContentLoaded', function() {
             fetch(`/customers/${id}`)
             .then(response => response.json())
             .then(customer => {
-                console.log(customer);
-                console.log(customer.id);
                 name.value = customer.name;
                 gender.value = customer.gender.toLowerCase();
                 payment.value = customer.payment;
                 handlePaymentChange(bank, payment);
                 bank.value = customer.bank;
-                console.log(customer.gender, customer.payment, customer.bank);
                 type.value = customer.customer_type.toLowerCase();
-                console.log(customer.hours);
                 duration.value = customer.hours;
                 startTime.value = new Date(customer.start_time).toLocaleString();
                 endTime.value = new Date(customer.end_time).toLocaleString();

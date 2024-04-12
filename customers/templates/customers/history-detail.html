@@ -1,71 +1,98 @@
 <div class="day-detail">
-<table>
-{% for row in rows %}
-        <thead>
-            <tr style="padding-top: 20px;">
-                <th style="text-align: left;"> {{ row.name }} </th>
-                <th class="price-paid" style="color: #0fc718;">
-                    +{{ row.cost|floatformat }}
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td style="text-align: left;"> {{ row.payment }} </td>
-                <td>
-                    {% if row.bank %}
-                        {{ row.bank }}
-                    {% endif %}
-                </td>
-                <td class="btn-pencil-cell">
-                    <button type="button" class="btn btn-sm btn-pencil" onclick="editDetail(this.closest('tbody'), {{row.id}}); "><i class="fa-solid fa-pen" style="color: #B197FC;"></i></button>
-                </td>
-            </tr>
-            <tr class="form-row" style="display: none;">
-                <td class="form-td">
-                    <form hx-post="{% url 'history-update' row.id%}" hx-swap="outerHTML" hx-target="closest .day-info">
-                        {% csrf_token %}
-                        <input class="form-control form-control-sm price-input" name="price" value="{{row.cost|floatformat}}" type="number" min="0">
-                        <select class="form-control form-control-sm payment-select" name="payment" type="text" onchange="handlePaymentChange(this.nextElementSibling, this)">
-                            {%for option in form.payment.field.choices %}
-                                {% if row.payment == option.0 %}
-                                    <option value="{{option.0}}" selected>{{option.1}}</option>
-                                {% else %}
-                                    <option value="{{option.0}}">{{option.1}}</option>
-                                {% endif %}
-                            {% endfor %}
-                        </select>
-                        {% if not row.bank %}
-                        <select class="form-control form-control-sm bank-select" name="bank" type="text" disabled>
-                            <option value="none"></option>
-                        </select>
-                        {% else %}
-                        <select class="form-control form-control-sm bank-select" name="bank" type="text">
-                            {%for option in form.bank.field.choices %}
-                                {% if row.bank == option.0 %}
-                                    <option value="{{option.0}}" selected>{{option.1}}</option>
-                                {% else %}
-                                    <option value="{{option.0}}">{{option.1}}</option>
-                                {% endif %}
-                            {% endfor %}
-                        </select>
+    <table>
+    {% for row in rows %}
+        {% if row.status == "finished" %}
+            <thead>
+                <tr style="padding-top: 20px;">
+                    <th style="text-align: left;"> {{ row.name }} </th>
+                    <th class="price-paid" style="color: #0fc718;">
+                        +{{ row.cost|floatformat }}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="text-align: left;"> {{ row.payment }} </td>
+                    <td>
+                        {% if row.bank %}
+                            {{ row.bank }}
                         {% endif %}
-                        <button class="btn btn-info btn-sm" type="submit">Save</button>
-                        <button class="btn btn-info btn-sm" type="button" onclick="cancelDetail(this.closest('tbody'), {{row.id}}, {{row.cost}})">Cancel</button>
-                    </form>
-                </td>
-            </tr>
-            <tr>
-                <td class="last-row" style="text-align: left;"> {{row.start_time|time}} - {{row.end_time|time}} </td>
-                {% if row.hours == 1 %}
-                <td class="last-row"> {{row.hours|floatformat}} hour </td>
-                {% else %}
-                <td class="last-row"> {{row.hours|floatformat}} hours </td>
-                {% endif %}
-
-
-            </tr>
-        </tbody>
-        {% endfor %}
+                    </td>
+                    <td class="btn-pencil-cell">
+                        <button type="button" class="btn btn-sm btn-pencil" onclick="editDetail(this.closest('tbody'), {{row.id}}); "><i class="fa-solid fa-pen" style="color: #B197FC;"></i></button>
+                    </td>
+                </tr>
+                <tr class="form-row" style="display: none;">
+                    <td class="form-td">
+                        <form hx-post="{% url 'history-update' row.id%}" hx-swap="outerHTML" hx-target="closest .day-info">
+                            {% csrf_token %}
+                            <input class="form-control form-control-sm price-input" name="price" value="{{row.cost|floatformat}}" type="number" min="0">
+                            <select class="form-control form-control-sm payment-select" name="payment" type="text" onchange="handlePaymentChange(this.nextElementSibling, this)">
+                                {%for option in form.payment.field.choices %}
+                                    {% if row.payment == option.0 %}
+                                        <option value="{{option.0}}" selected>{{option.1}}</option>
+                                    {% else %}
+                                        <option value="{{option.0}}">{{option.1}}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                            {% if not row.bank %}
+                            <select class="form-control form-control-sm bank-select" name="bank" type="text" disabled>
+                                <option value="none"></option>
+                            </select>
+                            {% else %}
+                            <select class="form-control form-control-sm bank-select" name="bank" type="text">
+                                {%for option in form.bank.field.choices %}
+                                    {% if row.bank == option.0 %}
+                                        <option value="{{option.0}}" selected>{{option.1}}</option>
+                                    {% else %}
+                                        <option value="{{option.0}}">{{option.1}}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                            {% endif %}
+                            <button class="btn btn-info btn-sm" type="submit">Save</button>
+                            <button class="btn btn-info btn-sm" type="button" onclick="cancelDetail(this.closest('tbody'), {{row.id}}, {{row.cost}})">Cancel</button>
+                        </form>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="last-row" style="text-align: left;"> {{row.start_time|time}} - {{row.end_time|time}} </td>
+                    {% if row.hours == 1 %}
+                    <td class="last-row"> {{row.hours|floatformat}} hour </td>
+                    {% else %}
+                    <td class="last-row"> {{row.hours|floatformat}} hours </td>
+                    {% endif %}
+                </tr>
+            </tbody>
+        {% elif row.status == "deleted" %}
+            <thead>
+                <tr style="padding-top: 20px;">
+                    <th style="text-align: left;"><s>{{ row.name }}</s></th>
+                    <td class="price-paid">
+                        deleted
+                    </td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="text-align: left;"><s> {{ row.payment }} </s></td>
+                    <td>
+                        {% if row.bank %}
+                            <s>{{ row.bank }}</s>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td class="last-row" style="text-align: left;"><s> {{row.start_time|time}} - {{row.end_time|time}} </s></td>
+                    {% if row.hours == 1 %}
+                    <td class="last-row"><s> {{row.hours|floatformat}} hour </s></td>
+                    {% else %}
+                    <td class="last-row"><s> {{row.hours|floatformat}} hours </s></td>
+                    {% endif %}
+                </tr>
+            </tbody>
+        {% endif %}
+    {% endfor %}
     </table>
 </div>

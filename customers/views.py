@@ -77,14 +77,16 @@ def add_customer(request):
 @require_POST
 def delete_customer(request, id):
     customer = Customer.objects.get(pk=id)
-    customer.delete()
+    customer.status = "deleted"
+    customer.end_time = datetime.now()
+    customer.save(update_fields=["status", "end_time"])
     return HttpResponse(f"Deleted {id}", status=200)
 
 @require_POST
 def add_hour(request, id):
     customer = Customer.objects.get(pk=id)
     if float(customer.hours) == 0.5:
-        customer.hours = float(customer.hours) + 1.5
+        customer.hours = float(customer.hours) + 0.5
     else:
         customer.hours += 1
     customer.end_time = customer.start_time + timedelta(hours=float(customer.hours))
