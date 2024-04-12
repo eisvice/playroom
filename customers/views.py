@@ -25,8 +25,8 @@ class CustomerForm(forms.Form):
         ("card", "Card")
     )
     BANK_CHOICES = (
-        ("bank1", "Bank 1"),
-        ("bank2", "Bank 2"),
+        ("sberbank", "Sberbank"),
+        ("tinkoff", "Tinkoff"),
     )
     payment = forms.ChoiceField(choices=PAYMENT_CHOICES)
     bank = forms.ChoiceField(choices=BANK_CHOICES)

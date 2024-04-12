@@ -293,11 +293,11 @@ function handlePaymentChange(bank, payment) {
     if (payment.value === 'card') {
         bank.removeAttribute('disabled');
         let bank1 = document.createElement('option');
-        bank1.value = 'bank1';
-        bank1.innerHTML = 'Bank 1';
+        bank1.value = 'sberbank';
+        bank1.innerHTML = 'Sberbank';
         let bank2 = document.createElement('option');
-        bank2.value = 'bank2';
-        bank2.innerHTML = 'Bank 2';
+        bank2.value = 'tinkoff';
+        bank2.innerHTML = 'Tinkoff';
         bank.append(bank1, bank2);
     }
 };
