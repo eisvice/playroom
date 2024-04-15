@@ -144,17 +144,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 window.location.reload();
             });
 
-            finishNow.addEventListener('click', function() {
-                fetch(`/custoemers/finish/${id}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': getCookie('csrftoken')
-                    },
-                    body: JSON.stringify({end_time: new Date()})
-                })
-                window.location.reload();
-            });
+            // finishNow.addEventListener('click', function() {
+            //     fetch(`/custoemers/finish/${id}`, {
+            //         method: 'POST',
+            //         headers: {
+            //             'Content-Type': 'application/json',
+            //             'X-CSRFToken': getCookie('csrftoken')
+            //         },
+            //         body: JSON.stringify({end_time: new Date()})
+            //     })
+            //     window.location.reload();
+            // });
         
             var kidAvatar = exampleModal.querySelector('img');
             kidAvatar.src = image.src;
