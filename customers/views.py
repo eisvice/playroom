@@ -4,6 +4,7 @@ import calendar
 from django import forms
 from django.urls import reverse
 from json import JSONDecodeError
+from django.utils import timezone
 from django.shortcuts import render
 from django.db import IntegrityError
 from django.core.paginator import Paginator
@@ -137,7 +138,7 @@ def finish(request, id):
         data = json.loads(request.body.decode('utf-8'))
     except JSONDecodeError:
         pass
-    if "data" in locals() and customer.end_time > datetime.now():
+    if "data" in locals() and customer.end_time > timezone.now():
         customer.end_time = datetime.now()
         customer.save(update_fields=["status", "cost", "end_time"])
     else:
@@ -250,8 +251,10 @@ def charts_view(request):
         return render(request, "customers/charts.html", {
             "cal_list": cal_list,
             "cal_sum": cal_sum,
+            "month_total": sum(cal_sum),
             "gender_set_count": gender_set_count,
             "gender_set": gender_set,
+            "payment_set_count": payment_set_count,
             "current_date": current_date,
             "page_obj": page_obj,
         })
