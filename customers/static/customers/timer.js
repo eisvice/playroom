@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const payment = exampleModal.querySelector('#payment-type');
         const saveChange = exampleModal.querySelector('#save-modal');
         const bank = exampleModal.querySelector('#bank-name');
+        const finishNow = exampleModal.querySelector('#finish-now');
         
         document.body.addEventListener('htmx:oobAfterSwap', function(evt) {
             if (document.getElementById('empty-picture')) {
@@ -139,6 +140,18 @@ document.addEventListener('DOMContentLoaded', function() {
                         customer_type: type.value,
                         duration: duration.value
                     })
+                })
+                window.location.reload();
+            });
+
+            finishNow.addEventListener('click', function() {
+                fetch(`/custoemers/finish/${id}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({end_time: new Date()})
                 })
                 window.location.reload();
             });

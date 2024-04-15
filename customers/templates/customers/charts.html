@@ -16,7 +16,8 @@
                 {% endif %}
             </div>
             <div class="col-6">
-                <h3>{{current_date|date:"F"}}</h3>
+                <h3>{{current_date|date:'F'}}</h3>
+                <p style="color:#0fc718;">+{{ month_total|floatformat:"1g" }}</p>
             </div>
             <div class="col-3">
                 {% if page_obj.has_next %}
@@ -26,13 +27,20 @@
         </div>
     </div>
 </div>
-
-<div class="container" style="max-width:960px;">
+<div class="container" style="max-width: 960px;">
     <canvas id="barChar"></canvas>
 </div>
 
-<div class="container" style="max-width:400px;">
-    <canvas id="pieChart"></canvas>
+<div class="container text-center" id="piecharts">
+    <h3>{{gender_set.count}} Customers in {{current_date|date:"F"}}</h3>
+    <div class="row justify-content-center">
+        <div class="col-sm-7 col-md-6 col-lg-4">
+            <canvas id="pieChart"></canvas>
+        </div>
+        <div class="col-sm-7 col-md-6 col-lg-4">
+            <canvas id="pieChartPayment"></canvas>
+        </div>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -40,6 +48,7 @@
 <script>
     const ctx = document.getElementById('barChar');
     const genderDiv = document.getElementById('pieChart');
+    const paymentDiv = document.getElementById('pieChartPayment');
 
     new Chart(ctx, {
         type: 'bar',
@@ -75,7 +84,28 @@
             plugins: {
                 title: {
                     display: true,
-                    text: [["Gender and Type"], "Total is {{gender_set.count}}"]
+                    text: ["Gender and Type"]
+                }
+            }
+        }
+    });
+
+    new Chart(paymentDiv, {
+        type: 'doughnut',
+        data: {
+            labels: ['Cash', 'Sberbank', 'Tinkoff'],
+            datasets: [{
+                label: 'Amount',
+                data: {{payment_set_count}},
+                hoverOffset: 4,
+            }]
+        },
+        options: {
+            radius: "100%",
+            plugins: {
+                title: {
+                    display: true,
+                    text: ["Payment Method"]
                 }
             }
         }

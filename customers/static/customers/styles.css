@@ -226,6 +226,9 @@ td {
   text-shadow: rgb(255, 255, 255) 1px 0 10px;;
 }
 
+#piecharts {
+  margin-top: 25px;
+}
 
 .notification-empty {
   margin-top: 40px;

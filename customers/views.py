@@ -133,6 +133,15 @@ def finish(request, id):
         customer.cost = playground_detail.rate - 50
     else:
         customer.cost = float(customer.hours * playground_detail.rate)
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except JSONDecodeError:
+        pass
+    if "data" in locals() and customer.end_time > datetime.now():
+        customer.end_time = datetime.now()
+        customer.save(update_fields=["status", "cost", "end_time"])
+    else:
+        customer.save(update_fields=["status", "cost"])
     customer.save(update_fields=["status", "cost"])
     customers_day_total = Customer.objects.filter(playground_detail=playground_detail, status="finished").aggregate(Sum("cost"))
     playground_detail.total_amount = float(customers_day_total["cost__sum"])
@@ -209,18 +218,18 @@ def charts_view(request):
             current_date = today
         page_obj = paginator.get_page(page_number)
         gender_set = Customer.objects.filter(playground=playground, end_time__month=current_date.month, end_time__year=current_date.year, status='finished')
-        newcomer_f = newcomer_m = returning_f = returning_m = 0
-        for g in gender_set:
-            if g.customer_type == "newcomer" and g.gender == "female":
-                newcomer_f += 1
-            elif g.customer_type == "newcomer" and g.gender == "male":
-                newcomer_m += 1
-            elif g.customer_type == "returning" and g.gender == "female":
-                returning_f += 1
-            elif g.customer_type == "returning" and g.gender == "male":
-                returning_m += 1
-        gender_set_count = [newcomer_f, newcomer_m, returning_f, returning_m]                
-        
+        # customer and gender division piechart
+        newcomer_f = gender_set.filter(customer_type="newcomer", gender="female").count()
+        newcomer_m = gender_set.filter(customer_type="newcomer", gender="male").count()
+        returning_f = gender_set.filter(customer_type="returning", gender="female").count()
+        returning_m = gender_set.filter(customer_type="returning", gender="male").count()
+        gender_set_count = [newcomer_f, newcomer_m, returning_f, returning_m]
+        # payment method piechart
+        cash = gender_set.filter(payment="cash").aggregate(Sum("cost", default=0))
+        bank1 = gender_set.filter(payment="card", bank="sberbank").aggregate(Sum("cost", default=0))
+        bank2 = gender_set.filter(payment="card", bank="tinkoff").aggregate(Sum("cost", default=0))
+        payment_set_count = [float(cash["cost__sum"]), float(bank1["cost__sum"]), float(bank2["cost__sum"])]
+        # income by day barchart    
         query_set = PlaygroundDetail.objects.filter(playground=playground, date__month=current_date.month, date__year=current_date.year)
         query_set_dates = []
         query_set_price = []
