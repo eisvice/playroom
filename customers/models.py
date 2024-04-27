@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from datetime import timedelta, datetime, date
+from datetime import timedelta, date
 from django.utils import timezone
 
 
@@ -18,7 +18,7 @@ class User(AbstractUser):
 
 class PlaygroundDetail(models.Model):
     playground = models.ForeignKey(Playground, on_delete=models.CASCADE)
-    date = models.DateField(default=date.today())
+    date = models.DateField(default=date.today)
     rate = models.DecimalField(max_digits=8, decimal_places=2, default=350.0)
     total_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.0)
 
@@ -31,20 +31,29 @@ class Customer(models.Model):
     status = models.CharField(max_length=20, default="active")
     payment = models.CharField(max_length=10, default="cash")
     bank = models.CharField(max_length=20, blank=True, null=True)
-    start_time = models.DateTimeField(auto_now_add=True)
+    start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     cost = models.DecimalField(max_digits=6, decimal_places=2)
     playground = models.ForeignKey(Playground, on_delete=models.CASCADE)
     playground_detail = models.ForeignKey(PlaygroundDetail, on_delete=models.CASCADE)
     
+    def set_start_time(self):
+        current_tz = timezone.get_current_timezone()
+        self.start_time = timezone.now().astimezone(current_tz)
+        print("Start time is", self.start_time)
+
     def set_end_time(self):
-        print(self.start_time, self.hours)
-        self.end_time = datetime.now() + timedelta(hours=self.hours)
+        current_tz = timezone.get_current_timezone()
+        self.end_time = timezone.now().astimezone(current_tz) + timedelta(hours=self.hours)
+        print("Is timezone aware (models):", timezone.is_aware(self.end_time))
+        print("End time is", self.end_time)
 
     def set_name(self):
         self.name = self.customer_type.capitalize()
     
     def save(self, *args, **kwargs):
+        if not self.start_time:
+            self.set_start_time()
         if not self.end_time:
             self.set_end_time()
         if not self.name:
@@ -64,3 +73,6 @@ class Customer(models.Model):
             "end_time": self.end_time,
             "status": self.status,
         }
+    
+    def __str__(self):
+        return f"id: {self.id}, name: {self.name}, gender: {self.gender}, payment: {self.payment}, bank: {self.bank}, customer type: {self.customer_type}, hours: {self.hours}, start time: {self.start_time}, end time: {self.end_time}, status: {self.status}"

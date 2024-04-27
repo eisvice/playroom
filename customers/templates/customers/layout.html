@@ -22,6 +22,11 @@
         
         <!-- Title block -->
         <title>{% block title %}Activeness{% endblock %}</title>
+        <script>
+          // Timezone settings
+          const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+          document.cookie = "django_timezone=" + timezone;
+        </script>
     </head>
     <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
         <nav class="navbar navbar-expand-lg navbar-light bg-light">

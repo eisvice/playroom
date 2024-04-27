@@ -1,4 +1,3 @@
-import os
 import json
 import calendar
 from django import forms
@@ -6,11 +5,10 @@ from django.urls import reverse
 from json import JSONDecodeError
 from django.utils import timezone
 from django.shortcuts import render
+from datetime import timedelta, date
 from django.db import IntegrityError
 from django.core.paginator import Paginator
-from django.templatetags.static import static
-from django.db.models import Min, Max, Sum, Q
-from datetime import datetime, timedelta, date
+from django.db.models import Min, Sum, Q
 from django.template.loader import render_to_string
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.hashers import make_password
@@ -34,13 +32,14 @@ class CustomerForm(forms.Form):
 
 """HOME PAGE VIEWS"""
 def index(request):
+    # Get the current time zone from a browser
+    current_tz = timezone.get_current_timezone()
+    print("time zone in the index view", current_tz)
     if request.user.is_authenticated and not request.user.is_permission_given:
         return render(request, "customers/index.html", {"message": "Please wait untill you are being given a permission to see this site"})
     elif request.user.is_authenticated:
-        module_dir = os.path.dirname(__file__)
-        file_path = os.path.join(module_dir, static("sounds/cashregister.wav"))
         customers = Customer.objects.filter(playground=request.user.playground.id).filter(Q(status='active') | Q(status='await'))
-        context = {"customers": customers}
+        context = {"customers": customers, "server_tz": current_tz}
         return render(request, "customers/index.html", context)
     else:
         return HttpResponseRedirect("login")
@@ -57,11 +56,13 @@ def add_customer(request):
             new_customer[key] = value
         if (new_customer["gender"] == "male" or new_customer["gender"] == "female") and (new_customer["customer_type"] == "newcomer" or new_customer["customer_type"] == "returning"):
             if not PlaygroundDetail.objects.filter(date=date.today(), playground=playground):
+                print(f"Create a new day instance. Expected date is {date.today()}")
                 playground_detail = PlaygroundDetail.objects.create(
                     playground = Playground.objects.get(pk=request.user.playground.id),
                 )
                 playground_detail.save()
             else:
+                print("Date already exists in the db")
                 playground_detail = PlaygroundDetail.objects.filter(date=date.today(), playground=playground)[0]
             customer = Customer(
                 gender = new_customer["gender"],
@@ -79,9 +80,11 @@ def add_customer(request):
 
 @require_POST
 def delete_customer(request, id):
+    current_tz = timezone.get_current_timezone()
     customer = Customer.objects.get(pk=id)
     customer.status = "deleted"
-    customer.end_time = datetime.now()
+    customer.end_time = timezone.now().astimezone(current_tz)
+    print(f"Deletion time of user {customer.id}-{customer.name} is {customer.end_time}")
     customer.save(update_fields=["status", "end_time"])
     return HttpResponse(f"Deleted {id}", status=200)
 
@@ -128,6 +131,7 @@ def update_info(request, id):
 
 @require_POST
 def finish(request, id):
+    current_tz = timezone.get_current_timezone()
     customer = Customer.objects.get(pk=id)
     playground = Playground.objects.get(pk=request.user.playground.id)
     playground_detail = PlaygroundDetail.objects.filter(id=customer.playground_detail.id, playground=playground)[0]
@@ -140,12 +144,13 @@ def finish(request, id):
         data = json.loads(request.body.decode('utf-8'))
     except JSONDecodeError:
         pass
-    if "data" in locals() and customer.end_time > timezone.now():
-        customer.end_time = datetime.now()
+    if "data" in locals() and customer.end_time > timezone.now().astimezone(current_tz):
+        customer.end_time = timezone.now().astimezone(current_tz)
         customer.save(update_fields=["status", "cost", "end_time"])
     else:
         customer.save(update_fields=["status", "cost"])
-    customer.save(update_fields=["status", "cost"])
+    # customer.save(update_fields=["status", "cost"])
+    print(f"Customer {customer.id}-{customer.name} has finished")
     customers_day_total = Customer.objects.filter(playground_detail=playground_detail, status="finished").aggregate(Sum("cost"))
     playground_detail.total_amount = float(customers_day_total["cost__sum"])
     playground_detail.save(update_fields=["total_amount"])
@@ -210,7 +215,7 @@ def charts_view(request):
         playground = Playground.objects.get(pk=request.user.playground.id)
         details_min_date_dict = PlaygroundDetail.objects.filter(playground=playground).aggregate(Min("date", default=date.today()))
         details_min_date = details_min_date_dict["date__min"]
-        today = datetime.today()
+        today = date.today()
         months = ((today.year - details_min_date.year)*12 + today.month - details_min_date.month)
         months_list = [month for month in range(months+1)]
         paginator = Paginator(months_list, 1)

@@ -10,6 +10,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const emptyPicture = document.getElementById('empty-picture'); 
             emptyPicture.style.display = 'block';
         }
+
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        document.cookie = "django_timezone=" + timezone;
+        const timezoneDiv = document.getElementById('timezone-div');
+        timezoneDiv.textContent += ` / Browser time zone: ${timezone}`
         
         const exampleModal = document.getElementById('modal-customer-view');
         const duration = exampleModal.querySelector('#time-given');
@@ -163,9 +168,13 @@ document.addEventListener('DOMContentLoaded', function() {
         duration.onchange = function ()  {
             const endTimeStr = exampleModal.querySelector('#end-time-field');
             const startTimeStr = exampleModal.querySelector('#start-time-field');
-            let startTime = new Date(startTimeStr.value).getTime();
+            let startTime = startTimeStr.value;
             durationMilliseconds = parseFloat(duration.value)*60*60*1000;
-            endTimeStr.value = new Date(startTime + durationMilliseconds).toLocaleString();
+            let parts = startTime.split("/");
+            let dateParts = parts[2].split(", ");
+            let formattedDate = `${parts[1]}/${parts[0]}/${dateParts[0]} ${dateParts[1]}`;
+            let dateObject = new Date(formattedDate);
+            endTimeStr.value = new Date(dateObject.getTime() + durationMilliseconds).toLocaleString();
         };
 
         payment.onchange = function() {
