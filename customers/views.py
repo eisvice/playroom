@@ -57,10 +57,12 @@ def add_customer(request):
             new_customer[key] = value
         if (new_customer["gender"] == "male" or new_customer["gender"] == "female") and (new_customer["customer_type"] == "newcomer" or new_customer["customer_type"] == "returning"):
             if not PlaygroundDetail.objects.filter(date=date.today(), playground=playground):
-                PlaygroundDetail.objects.create(
+                playground_detail = PlaygroundDetail.objects.create(
                     playground = Playground.objects.get(pk=request.user.playground.id),
                 )
-            playground_detail = PlaygroundDetail.objects.filter(date=date.today(), playground=playground)[0]
+                playground_detail.save()
+            else:
+                playground_detail = PlaygroundDetail.objects.filter(date=date.today(), playground=playground)[0]
             customer = Customer(
                 gender = new_customer["gender"],
                 customer_type = new_customer["customer_type"],
@@ -74,7 +76,7 @@ def add_customer(request):
             customer_html = render_to_string("customers/oob-customer.html", {"customer": customer})
             return HttpResponse(button_group_html + customer_html)
     return HttpResponseBadRequest("Some button returned invalid data")
-        
+
 @require_POST
 def delete_customer(request, id):
     customer = Customer.objects.get(pk=id)
@@ -163,7 +165,7 @@ def history_view(request):
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
     if request.htmx:
-        return render(request, "customers/history-list.html", {"page_obj": page_obj})   
+        return render(request, "customers/history-list.html", {"page_obj": page_obj})
     else:
         return render(request, "customers/history.html", {"page_obj": page_obj})
 
@@ -199,7 +201,7 @@ def history_update_details(request, id):
     if 'error' in locals():
         return render(request, "customers/history-list.html", {"page_obj": [playground_detail], "error": error})
     return render(request, "customers/history-list.html", {"page_obj": [playground_detail]})
-    
+
 
 """CHART PAGE VIEWS"""
 @require_safe
@@ -230,7 +232,7 @@ def charts_view(request):
         bank1 = gender_set.filter(payment="card", bank="sberbank").aggregate(Sum("cost", default=0))
         bank2 = gender_set.filter(payment="card", bank="tinkoff").aggregate(Sum("cost", default=0))
         payment_set_count = [float(cash["cost__sum"]), float(bank1["cost__sum"]), float(bank2["cost__sum"])]
-        # income by day barchart    
+        # income by day barchart
         query_set = PlaygroundDetail.objects.filter(playground=playground, date__month=current_date.month, date__year=current_date.year)
         query_set_dates = []
         query_set_price = []
@@ -359,7 +361,7 @@ def register(request):
                 })
         try:
             user = User.objects.create(
-                username=username, 
+                username=username,
                 password=make_password(password),
                 playground = playground,
                 is_owner = is_owner,
