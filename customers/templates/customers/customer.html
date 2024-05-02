@@ -1,15 +1,15 @@
 {% load static %}
 <div class="col-lg-2 col-md-4 col-sm-6 customer-info">
     <h6 style="display: flex; justify-content: center;">
-        <div hx-post="{% url 'add-hour' customer.id %}" hx-swap="innerHTML" hx-target="next #duration-{{customer.id}}" style="cursor: pointer" class="add-hour-btn">
-            <img src="{% static 'images/timer.png' %}" style="width:16px; height:16px">
+        <div hx-post="{% url 'finish' customer.id %}" hx-swap="delete" hx-target="closest .customer-info" style="cursor: pointer" class="finish-btn">
+            <img src="{% static 'images/finish.png' %}" style="width:16px; height:16px">
         </div>
         &nbsp;{{ customer.name }}&nbsp;
         <div hx-post="{% url 'delete-customer' customer.id %}" hx-swap="delete" hx-target="closest .customer-info" style="cursor: pointer" class="delete-btn">
             <img src="{% static 'images/delete.png' %}" style="width:16px; height:16px">
         </div>
-        <div hx-post="{% url 'finish' customer.id %}" hx-swap="delete" hx-target="closest .customer-info" style="cursor: pointer" class="finish-btn">
-            <img src="{% static 'images/finish.png' %}" style="width:16px; height:16px">
+        <div hx-post="{% url 'add-hour' customer.id %}" hx-swap="innerHTML" hx-target="next #duration-{{customer.id}}" style="cursor: pointer" class="add-hour-btn">
+            <img src="{% static 'images/timer.png' %}" style="width:16px; height:16px">
         </div>
     </h6>
     <button class="btn btn-outline-warning btn-customer" data-bs-target="#modal-customer-view" data-bs-toggle="modal" data-bs-kid="{{customer.customer_type}}">

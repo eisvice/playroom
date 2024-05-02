@@ -21,7 +21,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const payment = exampleModal.querySelector('#payment-type');
         const saveChange = exampleModal.querySelector('#save-modal');
         const bank = exampleModal.querySelector('#bank-name');
-        const finishNow = exampleModal.querySelector('#finish-now');
         
         document.body.addEventListener('htmx:oobAfterSwap', function(evt) {
             if (document.getElementById('empty-picture')) {
@@ -61,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const content = timer.closest('.button-content');
                 let id = parseInt(timer.id.replace("duration-", ""));
                 if (endTimeInit < currentTime && endTime > currentTime) {
-                    customerInfo.querySelector('.finish-btn').style.display = 'none';
+                    customerInfo.querySelector('.add-hour-btn').style.display = 'none';
                     customerInfo.querySelector('.delete-btn').style.display = 'block';    
                     fetch(`/customers/${id}`, {
                         method: 'POST',
@@ -97,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 img.style.background = '';
                 img.style.backgroundColor = 'lightcoral';
                 timer.textContent = '00:00:00';
-                customerInfo.querySelector('.finish-btn').style.display = 'block';
+                customerInfo.querySelector('.add-hour-btn').style.display = 'block';
                 customerInfo.querySelector('.delete-btn').style.display = 'none';
             }
         });
@@ -149,18 +148,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 window.location.reload();
             });
 
-            // finishNow.addEventListener('click', function() {
-            //     fetch(`/custoemers/finish/${id}`, {
-            //         method: 'POST',
-            //         headers: {
-            //             'Content-Type': 'application/json',
-            //             'X-CSRFToken': getCookie('csrftoken')
-            //         },
-            //         body: JSON.stringify({end_time: new Date()})
-            //     })
-            //     window.location.reload();
-            // });
-        
             var kidAvatar = exampleModal.querySelector('img');
             kidAvatar.src = image.src;
         });
@@ -239,7 +226,7 @@ function startTimer(contentElement) {
             img.style.background = '';
             img.style.backgroundColor = 'lightcoral';
             timerElement.textContent = '00:00:00';
-            customerInfo.querySelector('.finish-btn').style.display = 'block';
+            customerInfo.querySelector('.add-hour-btn').style.display = 'block';
             customerInfo.querySelector('.delete-btn').style.display = 'none';
             fetch(`/customers/${id}`, {
                 method: 'POST',

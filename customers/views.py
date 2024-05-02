@@ -140,16 +140,11 @@ def finish(request, id):
         customer.cost = playground_detail.rate - 50
     else:
         customer.cost = float(customer.hours * playground_detail.rate)
-    try:
-        data = json.loads(request.body.decode('utf-8'))
-    except JSONDecodeError:
-        pass
-    if "data" in locals() and customer.end_time > timezone.now().astimezone(current_tz):
+    if timezone.now().astimezone(current_tz) < customer.end_time:
         customer.end_time = timezone.now().astimezone(current_tz)
         customer.save(update_fields=["status", "cost", "end_time"])
     else:
         customer.save(update_fields=["status", "cost"])
-    # customer.save(update_fields=["status", "cost"])
     print(f"Customer {customer.id}-{customer.name} has finished")
     customers_day_total = Customer.objects.filter(playground_detail=playground_detail, status="finished").aggregate(Sum("cost"))
     playground_detail.total_amount = float(customers_day_total["cost__sum"])
