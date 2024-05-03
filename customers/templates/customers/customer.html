@@ -12,7 +12,7 @@
             <img src="{% static 'images/timer.png' %}" style="width:16px; height:16px">
         </div>
     </h6>
-    <button class="btn btn-outline-warning btn-customer" data-bs-target="#modal-customer-view" data-bs-toggle="modal" data-bs-kid="{{customer.customer_type}}">
+    <button class="btn btn-outline-warning btn-customer" hx-get="{% url 'edit-customer' id=customer.id %}" hx-target="#dialog">
         <div class="button-content">
             <p class="timer" id="duration-{{customer.id}}" data-start-time="{{customer.start_time|date:'c'}}" data-end-time="{{customer.end_time|date:'c'}}">{{ customer.duration }}</p>
             {% if customer.gender == "male" %}

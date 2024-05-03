@@ -11,15 +11,13 @@
 
         {% include 'customers/buttongroup.html' %}
 
-        <div class="container bg-grey text-center activity-container" >
-            {% include 'customers/customers.html' %}
+        <div class="container bg-grey text-center activity-container" hx-get="{% url 'customers-list' %}" hx-trigger="load, customerChanged from:body" hx-target="this">
+            
         </div>
         
         <!-- Modal -->
-        <div class="modal fade" id="modal-customer-view" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div id="dialog" class="modal-dialog" hx-target="this">
-                {% include 'customers/customer-form.html' %}
-            </div>
+        <div id="modal" class="modal fade">
+            <div id="dialog" class="modal-dialog" hx-target="this"></div>
         </div>
     {% else %}
         <div id="wait-message" class="container text-center">

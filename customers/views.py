@@ -1,10 +1,8 @@
 import json
 import calendar
-from django import forms
 from django.urls import reverse
 from json import JSONDecodeError
 from django.utils import timezone
-from django.shortcuts import render
 from datetime import timedelta, date
 from django.db import IntegrityError
 from django.core.paginator import Paginator
@@ -13,6 +11,7 @@ from .forms import CustomerForm, CustomerModelForm
 from django.template.loader import render_to_string
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.hashers import make_password
+from django.shortcuts import render, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.http import require_POST, require_safe
 from customers.models import User, Playground, Customer, PlaygroundDetail
@@ -27,12 +26,38 @@ def index(request):
     if request.user.is_authenticated and not request.user.is_permission_given:
         return render(request, "customers/index.html", {"message": "Please wait untill you are being given a permission to see this site"})
     elif request.user.is_authenticated:
-        customers = Customer.objects.filter(playground=request.user.playground.id).filter(Q(status='active') | Q(status='await'))
-        form = CustomerModelForm()
-        context = {"customers": customers, "server_tz": current_tz, "form": form}
+        # customers = Customer.objects.filter(playground=request.user.playground.id).filter(Q(status='active') | Q(status='await'))
+        # context = {"server_tz": current_tz, "customers": customers}
+        context = {"server_tz": current_tz}
         return render(request, "customers/index.html", context)
     else:
         return HttpResponseRedirect("login")
+    
+def customers_list(request):
+    customers = Customer.objects.filter(playground=request.user.playground.id).filter(Q(status='active') | Q(status='await'))
+    context = {"customers": customers}
+    return render(request, "customers/customers.html", context)
+    
+def edit_customer(request, id):
+    customer = get_object_or_404(Customer, pk=id)
+    if request.method == "POST":
+        form = CustomerModelForm(request.POST, instance=customer)
+        if form.is_valid():
+            customer_info = form.save(commit=False)
+            customer_info.end_time = customer_info.start_time + timedelta(hours=float(customer_info.hours))
+            customer_info.save()
+            return HttpResponse(
+                status=204,
+                headers={
+                    'HX-Trigger': "customerChanged"
+                }
+            )
+    else:
+        form = CustomerModelForm(instance=customer)
+    return render(request, 'customers/customer-form.html', {
+        'form': form,
+        'customer': customer,
+    })
 
 @require_POST
 def add_customer(request):

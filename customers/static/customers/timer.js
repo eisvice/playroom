@@ -2,25 +2,13 @@ const cashRegisterSoundURL = document.currentScript.getAttribute('data-cash-regi
 const audio = new Audio(cashRegisterSoundURL);
 
 document.addEventListener('DOMContentLoaded', function() {
-    
     const currentPath = window.location.pathname;
-    
     if (currentPath === '/' && !document.getElementById('wait-message')) {
-        if (!document.querySelector('.customer-info') && document.getElementById('empty-picture').style.display === 'none') {
-            const emptyPicture = document.getElementById('empty-picture'); 
-            emptyPicture.style.display = 'block';
-        }
 
         const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         document.cookie = "django_timezone=" + timezone;
         const timezoneDiv = document.getElementById('timezone-div');
         timezoneDiv.textContent += ` / Browser time zone: ${timezone}`
-        
-        const exampleModal = document.getElementById('modal-customer-view');
-        const duration = exampleModal.querySelector('#time-given');
-        const payment = exampleModal.querySelector('#payment-type');
-        const saveChange = exampleModal.querySelector('#save-modal');
-        const bank = exampleModal.querySelector('#bank-name');
         
         document.body.addEventListener('htmx:oobAfterSwap', function(evt) {
             if (document.getElementById('empty-picture')) {
@@ -35,11 +23,13 @@ document.addEventListener('DOMContentLoaded', function() {
             startTimer(content);
         });
     
-        document.addEventListener('htmx:afterRequest', function(evt) {
-            if (!document.querySelector('.customer-info') && document.getElementById('empty-picture').style.display === 'none') {
-                const emptyPicture = document.getElementById('empty-picture'); 
+        htmx.on('htmx:afterRequest', function(evt) {
+            const customersInfo = document.querySelector('.customer-info');
+            const emptyPicture = document.getElementById('empty-picture');
+            if (!customersInfo && emptyPicture && emptyPicture.style.display === 'none') {
                 emptyPicture.style.display = 'block';
             }
+            
             if (evt.detail.elt.classList.contains('add-hour-btn')) {
                 const timer = evt.detail.target;
                 const customerInfo = timer.closest('.customer-info');
@@ -79,96 +69,30 @@ document.addEventListener('DOMContentLoaded', function() {
                     startTimer(content);
                 }
             }
-        });
-        
-        const contents = document.querySelectorAll('.button-content');
-        // Start the timer for each timer element
-        contents.forEach(content => {
-            const customerInfo = content.closest('.customer-info');
-            const timer = content.querySelector('.timer');
-            const img = content.querySelector('img');
-            let endTimeStr = timer.dataset.endTime;
-            let endTime = new Date(endTimeStr);
-            let currentTime = new Date();
-            if (endTime > currentTime) {
-                startTimer(content);
-            } else {
-                img.style.background = '';
-                img.style.backgroundColor = 'lightcoral';
-                timer.textContent = '00:00:00';
-                customerInfo.querySelector('.add-hour-btn').style.display = 'block';
-                customerInfo.querySelector('.delete-btn').style.display = 'none';
+
+            if (evt.detail.elt.classList.contains('activity-container')) {
+                const contents = document.querySelectorAll('.button-content');
+                // Start the timer for each timer element
+                contents.forEach(content => {
+                    const customerInfo = content.closest('.customer-info');
+                    const timer = content.querySelector('.timer');
+                    const img = content.querySelector('img');
+                    let endTimeStr = timer.dataset.endTime;
+                    let endTime = new Date(endTimeStr);
+                    let currentTime = new Date();
+                    if (endTime > currentTime) {
+                        console.log(content);
+                        startTimer(content);
+                    } else {
+                        img.style.background = '';
+                        img.style.backgroundColor = 'lightcoral';
+                        timer.textContent = '00:00:00';
+                        customerInfo.querySelector('.add-hour-btn').style.display = 'block';
+                        customerInfo.querySelector('.delete-btn').style.display = 'none';
+                    }
+                }); 
             }
         });
-        
-        exampleModal.addEventListener('show.bs.modal', function (event) {
-            // Button that triggered the modal
-            const button = event.relatedTarget;
-            const timer = button.querySelector('.timer');
-            let id = parseInt(timer.id.replace('duration-', ''));
-            // console.log("id is", id);
-            const image = button.querySelector('img');
-            const name = exampleModal.querySelector('#change-name');
-            const gender = exampleModal.querySelector('#gender-field');
-            const type = exampleModal.querySelector('#customer-type');
-            const startTime = exampleModal.querySelector('#start-time-field');
-            const endTime = exampleModal.querySelector('#end-time-field');
-            // console.log(button, timer, image, name, gender, type, startTime, endTime);
-            // // If necessary, you could initiate an AJAX request here
-            // // and then do the updating in a callback.
-            // //
-            // // Update the modal's content.
-            fetch(`/customers/${id}`)
-            .then(response => response.json())
-            .then(customer => {
-                name.value = customer.name;
-                gender.value = customer.gender.toLowerCase();
-                payment.value = customer.payment;
-                handlePaymentChange(bank, payment);
-                bank.value = customer.bank;
-                type.value = customer.customer_type.toLowerCase();
-                duration.value = customer.hours;
-                startTime.value = new Date(customer.start_time).toLocaleString();
-                endTime.value = new Date(customer.end_time).toLocaleString();
-            })
-        
-            saveChange.addEventListener('click', function() {
-                fetch(`/customers/${id}`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': getCookie('csrftoken')
-                    },
-                    body: JSON.stringify({
-                        name: name.value,
-                        gender: gender.value,
-                        payment: payment.value,
-                        bank: bank.value,
-                        customer_type: type.value,
-                        duration: duration.value
-                    })
-                })
-                window.location.reload();
-            });
-
-            var kidAvatar = exampleModal.querySelector('img');
-            kidAvatar.src = image.src;
-        });
-        
-        duration.onchange = function ()  {
-            const endTimeStr = exampleModal.querySelector('#end-time-field');
-            const startTimeStr = exampleModal.querySelector('#start-time-field');
-            let startTime = startTimeStr.value;
-            durationMilliseconds = parseFloat(duration.value)*60*60*1000;
-            let parts = startTime.split("/");
-            let dateParts = parts[2].split(", ");
-            let formattedDate = `${parts[1]}/${parts[0]}/${dateParts[0]} ${dateParts[1]}`;
-            let dateObject = new Date(formattedDate);
-            endTimeStr.value = new Date(dateObject.getTime() + durationMilliseconds).toLocaleString();
-        };
-
-        payment.onchange = function() {
-            handlePaymentChange(bank, payment)
-        };
     }
 });
 

@@ -1,105 +1,40 @@
+{% load widget_tweaks %}
+{% load static %}
 <!-- Modal content-->
-<div class="modal-content">
+<form hx-post="{{ request.path }}" hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}' class="modal-content">
     <div class="modal-header">
-        <h5 class="modal-title">Change properies</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <h5 class="modal-title">Change Properties</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
     </div>
     <div class="modal-body">
-        {{form}}
-        <form>
-            <div class="row text-center">
-                <div class="col-md-12">
-                    <img width="64" height="64" class="img-circle" alt="boy">
-                </div>
+        <div class="row text-center">
+            <div class="col-md-12">
+                {% if form.gender.value == 'male' %}
+                    <img src="{% static 'images/alien_boy.png' %}" alt="boy" width="64" height="64" class="img-circle">
+                {% elif form.gender.value == 'female' %}
+                    <img src="{% static 'images/alien_girl.png' %}" alt="girl" width="64" height="64" class="img-circle">
+                {% endif %}
             </div>
-            <div class="row">
-                <div class="col-md-4">
-                    <label for="change-name" class="col-form-label">Change name:</label>
-                </div>
-                <div class="col-md-8">
-                    <input type="text" class="form-control" id="change-name">
-                </div>
+        </div>
+        {% for row in form %}
+        <div class="row">
+            <div class="col-md-4">
+                <label for="{{row.id_for_label}}" class="col-form-label">{{row.label_tag}}</label>
             </div>
-            <div class="row">
-                <div class="col-md-4">
-                    <label for="gender-field" class="col-form-label">Gender:</label>
-                </div>
-                <div class="col-md-8">
-                    <select type="text" class="form-control" id="gender-field">
-                        <option value="male">Male</option>
-                        <option value="female">Female</option> 
-                    </select>
-                </div>
+            <div class="col-md-8">
+                {% render_field row class="form-control" %}
             </div>
-            <div class="row">
-                <div class="col-md-4">
-                    <label for="payment-type" class="col-form-label">Payment:</label>
-                </div>
-                <div class="col-md-8">
-                    <select type="text" class="form-control" id="payment-type">
-                        <option value="cash">Cash</option>
-                        <option value="card">Card</option> 
-                    </select>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-4">
-                    <label for="bank-name" class="col-form-label">Bank:</label>
-                </div>
-                <div class="col-md-8">
-                    <select type="text" class="form-control" id="bank-name">
-                        <option value="none"></option>
-                        <option value="sberbank">Sberbank</option>
-                        <option value="tinkoff">Tinkoff</option> 
-                    </select>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-4">
-                    <label for="customer-type" class="col-form-label">Type:</label>
-                </div>
-                <div class="col-md-8">
-                    <select class="form-control" id="customer-type" name="customer-type">
-                        <option value="newcomer">Newcomer</option>
-                        <option value="returning">Returning</option>
-                    </select>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-4"><label for="time-given" class="col-form-label">Duration:</label></div>
-                <div class="col-md-8">
-                    <select class="form-control" id="time-given" name="time-given">
-                        <option value="0.50">30 minutes</option>
-                        <option value="1.00" selected>1 hour</option>
-                        <option value="2.00">2 hours</option>
-                        <option value="3.00">3 hours</option>
-                        <option value="4.00">4 hours</option>
-                        <option value="5.00">5 hours</option>
-                        <option value="6.00">6 hours</option>
-                        <option value="7.00">7 hours</option>
-                        <option value="8.00">8 hours</option>
-                        <option value="9.00">9 hours</option>
-                        <option value="10.00">10 hours</option>
-                    </select>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-4">
-                    <label for="start-time-field" class="col-form-label">Start Time</label>
-                </div>
-                <div class="col-md-8"><input type="text" class="form-control" id="start-time-field" disabled readonly></div>
-            </div>
-            <div class="row">
-                <div class="col-md-4">
-                    <label for="end-time-field" class="col-form-label">End Time</label>
-                </div>
-                <div class="col-md-8"><input type="text" class="form-control" id="end-time-field" disabled readonly></div>
-            </div>
-        </form>
+        </div>
+        {% endfor %}
     </div>
     <div class="modal-footer">
-        <!-- <button type="button" class="btn btn-primary" >Finish Now</button> -->
-        <button type="submit" class="btn btn-primary" id="save-modal">Save Changes</button>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        {% if movie %}
+            <button type="button" class="btn btn-danger" hx-post="{% url 'remove_movie' pk=movie.pk %}">Remove</button>
+            <span class="flex-grow-1"></span>
+        {% endif %}
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            Cancel
+        </button>
     </div>
-</div>
+</form>
