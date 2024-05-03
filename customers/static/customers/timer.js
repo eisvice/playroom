@@ -106,12 +106,14 @@ document.addEventListener('DOMContentLoaded', function() {
             const button = event.relatedTarget;
             const timer = button.querySelector('.timer');
             let id = parseInt(timer.id.replace('duration-', ''));
+            // console.log("id is", id);
             const image = button.querySelector('img');
             const name = exampleModal.querySelector('#change-name');
             const gender = exampleModal.querySelector('#gender-field');
             const type = exampleModal.querySelector('#customer-type');
             const startTime = exampleModal.querySelector('#start-time-field');
             const endTime = exampleModal.querySelector('#end-time-field');
+            // console.log(button, timer, image, name, gender, type, startTime, endTime);
             // // If necessary, you could initiate an AJAX request here
             // // and then do the updating in a callback.
             // //

@@ -9,6 +9,7 @@ from datetime import timedelta, date
 from django.db import IntegrityError
 from django.core.paginator import Paginator
 from django.db.models import Min, Sum, Q
+from .forms import CustomerForm, CustomerModelForm
 from django.template.loader import render_to_string
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.hashers import make_password
@@ -17,18 +18,6 @@ from django.views.decorators.http import require_POST, require_safe
 from customers.models import User, Playground, Customer, PlaygroundDetail
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, JsonResponse, HttpResponseForbidden
 
-
-class CustomerForm(forms.Form):
-    PAYMENT_CHOICES = (
-        ("cash", "Cash"),
-        ("card", "Card")
-    )
-    BANK_CHOICES = (
-        ("sberbank", "Sberbank"),
-        ("tinkoff", "Tinkoff"),
-    )
-    payment = forms.ChoiceField(choices=PAYMENT_CHOICES)
-    bank = forms.ChoiceField(choices=BANK_CHOICES)
 
 """HOME PAGE VIEWS"""
 def index(request):
@@ -39,7 +28,8 @@ def index(request):
         return render(request, "customers/index.html", {"message": "Please wait untill you are being given a permission to see this site"})
     elif request.user.is_authenticated:
         customers = Customer.objects.filter(playground=request.user.playground.id).filter(Q(status='active') | Q(status='await'))
-        context = {"customers": customers, "server_tz": current_tz}
+        form = CustomerModelForm()
+        context = {"customers": customers, "server_tz": current_tz, "form": form}
         return render(request, "customers/index.html", context)
     else:
         return HttpResponseRedirect("login")
