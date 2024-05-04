@@ -50,7 +50,7 @@
 })()
 
 function paymentChange(payment, bank) {
-  if (payment.value === 'cash') {
+  if (payment && payment.value === 'cash') {
     let opt = document.createElement('option');
     opt.value = '';
     opt.innerHTML = '';

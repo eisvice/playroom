@@ -125,7 +125,7 @@ function startTimer(contentElement) {
             endTimeInit = endTime;
         }
 
-        duration -= 1000;
+        duration = endTime - new Date();
 
         let durationInSeconds = Math.round(duration / 1000); // Convert milliseconds to seconds
 
@@ -146,7 +146,7 @@ function startTimer(contentElement) {
         let backgroundPercent = (new Date() - startTime)/(endTime - startTime) * 100;
         console.log("Percent:", backgroundPercent);
         
-        if (duration > 0) {
+        if (endTime - new Date() > 0) {
             img.style.background = `linear-gradient(0deg, rgba(72,195,34,1) ${backgroundPercent}%, rgba(49,253,45,0) ${backgroundPercent}%)`;
         } else {
             img.style.background = '';
