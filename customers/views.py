@@ -1,21 +1,29 @@
 import json
 import calendar
-from django.urls import reverse
 from json import JSONDecodeError
 from django.utils import timezone
 from datetime import timedelta, date
 from django.db import IntegrityError
-from django.core.paginator import Paginator
 from django.db.models import Min, Sum, Q
+from django.core.paginator import Paginator
+from django.urls import reverse, reverse_lazy
 from .forms import CustomerForm, CustomerModelForm
 from django.template.loader import render_to_string
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.hashers import make_password
 from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.views import PasswordChangeView
+from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.http import require_POST, require_safe
 from customers.models import User, Playground, Customer, PlaygroundDetail
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, JsonResponse, HttpResponseForbidden
+
+
+class ChangePasswordView(PasswordChangeView):
+    form_class = PasswordChangeForm
+    template_name = "customers/change-password.html"
+    success_url = reverse_lazy("index")
 
 
 """HOME PAGE VIEWS"""

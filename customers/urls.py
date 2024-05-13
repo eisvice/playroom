@@ -1,12 +1,13 @@
 from django.urls import path
-
 from . import views
+from .views import ChangePasswordView
 
 urlpatterns = [
     path("", views.index, name="index"),
     path("login", views.login_view, name="login"),
     path("logout", views.logout_view, name="logout"),
     path("register", views.register, name="register"),
+    path("password", ChangePasswordView.as_view(), name="password"),
     path("customers", views.add_customer, name="customers"),
     path("customers/<int:id>", views.update_info, name="customers_update"),
     path("customers-list", views.customers_list, name="customers-list"),
