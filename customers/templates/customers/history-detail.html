@@ -1,5 +1,17 @@
 {% load static %}
+
 <div class="day-detail">
+    <hr/>
+    <h6 style="font: bolder;">
+        {% for pd in payment_distro %}
+            {% if pd.bank == None %}
+                Cash: {{pd.cost__sum}} &nbsp;
+            {% else %}
+                {{pd.bank|capfirst}}: {{pd.cost__sum}} &nbsp;
+            {% endif %}
+        {% endfor %}
+    </h6>
+    <hr/>
     <table>
     {% for row in rows %}
         {% if row.status == "finished" %}

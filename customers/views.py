@@ -26,8 +26,6 @@ def index(request):
     if request.user.is_authenticated and not request.user.is_permission_given:
         return render(request, "customers/index.html", {"message": "Please wait untill you are being given a permission to see this site"})
     elif request.user.is_authenticated:
-        # customers = Customer.objects.filter(playground=request.user.playground.id).filter(Q(status='active') | Q(status='await'))
-        # context = {"server_tz": current_tz, "customers": customers}
         context = {"server_tz": current_tz}
         return render(request, "customers/index.html", context)
     else:
@@ -45,6 +43,8 @@ def edit_customer(request, id):
         if form.is_valid():
             customer_info = form.save(commit=False)
             customer_info.end_time = customer_info.start_time + timedelta(hours=float(customer_info.hours))
+            if customer.bank == "":
+                customer.bank = None
             customer_info.save()
             return HttpResponse(
                 status=204,
@@ -127,22 +127,6 @@ def update_info(request, id):
             customer.status = data["status"]
             customer.save(update_fields=["status"])
             return JsonResponse({"message": "allright"})
-        elif len(data) > 1:
-            try:
-                duration = float(data["duration"])
-            except ValueError:
-                duration = customer.hours
-            customer.name = data["name"]
-            customer.gender = data["gender"]
-            customer.payment = data["payment"]
-            if data["bank"] != "none" or data["bank"] != None:
-                customer.bank = data["bank"]
-            customer.customer_type = data["customer_type"]
-            customer.hours = duration
-            customer.end_time = customer.start_time + timedelta(hours=duration)
-            customer.save(update_fields=["name", "gender","payment", "bank", "customer_type", "hours", "end_time"])
-            context = {"customers": Customer.objects.filter(Q(status='active') | Q(status='await'))}
-        return render(request, "customers/index.html", context)
 
 @require_POST
 def finish(request, id):
@@ -173,7 +157,7 @@ def history_view(request):
     if request.user.is_owner:
         playground_detail = PlaygroundDetail.objects.filter(playground=request.user.playground).order_by("-date")
     elif request.user.is_permission_given:
-        playground_detail = PlaygroundDetail.objects.filter(playground=request.user.playground).order_by("-date")[:3]
+        playground_detail = PlaygroundDetail.objects.filter(playground=request.user.playground).order_by("-date")[:1]
     else:
         return HttpResponseRedirect(reverse("index"))
     paginator = Paginator(playground_detail, 5)
@@ -188,8 +172,10 @@ def history_view(request):
 def history_detail(request, id):
     playground_detail = PlaygroundDetail.objects.get(pk=id)
     rows = Customer.objects.filter(playground_detail=playground_detail).filter(Q(status='finished') | Q(status='deleted')).order_by("-end_time")
+    payment_distro = rows.filter(status='finished').values("bank").annotate(Sum("cost")).order_by()
     return render(request, "customers/history-detail.html", {
         "rows": rows,
+        "payment_distro": payment_distro,
         "form": CustomerForm(),
         })
 
