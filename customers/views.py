@@ -143,15 +143,20 @@ def finish(request, id):
     playground = Playground.objects.get(pk=request.user.playground.id)
     playground_detail = PlaygroundDetail.objects.filter(id=customer.playground_detail.id, playground=playground)[0]
     customer.status = "finished"
-    if customer.hours == 0.5:
-        customer.cost = playground_detail.rate - 50
+
+    if customer.hours == 0.25:
+        customer.cost = 200
+    elif customer.hours == 0.5:
+        customer.cost = 300
     else:
         customer.cost = float(customer.hours * playground_detail.rate)
+
     if timezone.now().astimezone(current_tz) < customer.end_time:
         customer.end_time = timezone.now().astimezone(current_tz)
         customer.save(update_fields=["status", "cost", "end_time"])
     else:
         customer.save(update_fields=["status", "cost"])
+
     print(f"Customer {customer.id}-{customer.name} has finished")
     customers_day_total = Customer.objects.filter(playground_detail=playground_detail, status="finished").aggregate(Sum("cost"))
     playground_detail.total_amount = float(customers_day_total["cost__sum"])

@@ -19,7 +19,7 @@ class User(AbstractUser):
 class PlaygroundDetail(models.Model):
     playground = models.ForeignKey(Playground, on_delete=models.CASCADE)
     date = models.DateField(default=date.today)
-    rate = models.DecimalField(max_digits=8, decimal_places=2, default=350.0)
+    rate = models.DecimalField(max_digits=8, decimal_places=2, default=500.0)
     total_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.0)
 
 

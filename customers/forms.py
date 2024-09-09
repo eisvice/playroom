@@ -14,6 +14,7 @@ CUSTOMER_TYPE_CHOICES = {
 }
 
 HOURS_CHOICES = (
+    (Decimal("0.25"), "15 minutes"),
     (Decimal("0.50"), "30 minutes"),
     (Decimal("1.00"), "1 hour"),
 ) + tuple((Decimal(f"{i:.2f}"), f"{i} hours") for i in range(2, 11))
