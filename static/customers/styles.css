@@ -141,7 +141,7 @@ figcaption {
 }
 
 
-.finish-btn {
+.add-hour-btn {
   display: none;
 }
 
@@ -164,7 +164,8 @@ table, td, th {
 .table-holder {
   display: grid;
   width: 50%;
-  justify-self: end;
+  justify-self: center;
+  justify-content: center;
 }
 
 
