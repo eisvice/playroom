@@ -36,6 +36,7 @@ DEBUG = os.environ.get('DJANGO_DEBUG', default=0) != 'False'
 
 ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS','127.0.0.1').split(",")
 CSRF_TRUSTED_ORIGINS = os.environ.get('DJANGO_CSRF_TRUSTED_ORIGINS').split(",")
+print(os.environ.get('DJANGO_HELLO_FROM_ENV', 'HELLO FROM SETTINGS'))
 
 # Application definition
 
