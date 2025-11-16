@@ -27,15 +27,15 @@ load_dotenv(env_path)
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # SECRET_KEY = '6django-insecure-9ll*evdl)j11ct_7z*fy!7q&%=o+r7v&8ckh-%t(d#con_xf6'
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '6django-insecure-9ll*evdl)j11ct_7z*fy!7q&%=o+r7v&8ckh-%t(d#con_xf6')
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = True
-DEBUG = os.environ.get('DJANGO_DEBUG', '') != 'False'
+DEBUG = os.environ.get('DJANGO_DEBUG', default=0) != 'False'
 
 
-ALLOWED_HOSTS = ['lazac.pythonanywhere.com', '127.0.0.1']
-CSRF_TRUSTED_ORIGINS = ['https://lazac.pythonanywhere.com']
+ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS','127.0.0.1').split(",")
+CSRF_TRUSTED_ORIGINS = os.environ.get('DJANGO_CSRF_TRUSTED_ORIGINS').split(",")
 
 # Application definition
 
